@@ -1,0 +1,17 @@
+using Domain.Entitites.Shared;
+
+namespace Application.Dtos.AppFileLog
+{
+    public class AppFileLogFilterDto
+    {
+        public int? AppFileId { get; set; }
+        public int? AppStoredFileId { get; set; }
+        public int? StoredFileId { get; set; }
+        public AppFileActionType? ActionType { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string? UserId { get; set; }
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 50;
+    }
+}
