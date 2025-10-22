@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\victo\\source\\repos\\Gameout-Api\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj": {}
+    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj": {}
   },
   "projects": {
-    "C:\\Users\\victo\\source\\repos\\Gameout-Api\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj": {
+    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\victo\\source\\repos\\Gameout-Api\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj",
+        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj",
         "projectName": "Packages.Helpers.Infraestructure",
-        "projectPath": "C:\\Users\\victo\\source\\repos\\Gameout-Api\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj",
+        "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj",
         "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\victo\\source\\repos\\Gameout-Api\\Packages.Helpers.Infraestructure\\obj\\",
+        "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Infraestructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -45,7 +45,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net6.0": {
@@ -72,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
         }
       }
     }

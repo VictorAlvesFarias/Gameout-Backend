@@ -18,34 +18,25 @@ namespace Application.Services.AppFileService
         private readonly IBaseRepository<AppFile> _appFileRepository;
         private readonly IBaseRepository<AppStoredFile> _appStoredFileRepository;
         private readonly IBaseRepository<StoredFile> _storedFileRepository;
-        private readonly IQueueService<AppFileUpdateRequestMessage> _queue;
         private readonly ApplicationContext _applicationContext;
         private readonly WebSocketWorker _webSocketWorker;
         private readonly IAppFileLogService _appFileLogService;
-        private readonly IQueueService<AppFileStatusCheckRequestMessage> _statusCheckQueue;
-        private readonly IQueueService<AppFileValidateStatusRequest> _validateStatusCheckQueue;
 
         public AppFileService(
             IBaseRepository<AppFile> appFileRepository,
             IBaseRepository<StoredFile> storedFileRepository,
             IBaseRepository<AppStoredFile> appStoredFileRepository,
             ApplicationContext applicationContext,
-            IQueueService<AppFileUpdateRequestMessage> queue,
             WebSocketWorker webSocketWorker,
-            IAppFileLogService appFileLogService,
-            IQueueService<AppFileStatusCheckRequestMessage> statusCheckQueue,
-            IQueueService<AppFileValidateStatusRequest> validateStatusCheckQueue
+            IAppFileLogService appFileLogService
         )
         {
             _appFileRepository = appFileRepository;
             _storedFileRepository = storedFileRepository;
             _appStoredFileRepository = appStoredFileRepository;
             _applicationContext = applicationContext;
-            _queue = queue;
             _webSocketWorker = webSocketWorker;
             _appFileLogService = appFileLogService;
-            _statusCheckQueue = statusCheckQueue;
-            _validateStatusCheckQueue = validateStatusCheckQueue;
         }
 
         public BaseResponse<AppFile> InsertFile(AppFile req)

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "o4j94UWZ3mM=",
+  "dgSpecHash": "vRzq2JZSDiY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\victo\\source\\repos\\Gameout-Api\\Packages.Helpers.Application\\Packages.Helpers.Application.csproj",
+  "projectFilePath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Application\\Packages.Helpers.Application.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.aspnetcore.http.abstractions\\2.3.0\\microsoft.aspnetcore.http.abstractions.2.3.0.nupkg.sha512",
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.aspnetcore.http.features\\2.3.0\\microsoft.aspnetcore.http.features.2.3.0.nupkg.sha512",

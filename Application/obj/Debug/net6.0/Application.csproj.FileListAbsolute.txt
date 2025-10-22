@@ -155,3 +155,12 @@ C:\Users\victo\source\repos\Gameout-Api\Application\obj\Debug\net6.0\Application
 C:\Users\victo\source\repos\Gameout-Api\Application\obj\Debug\net6.0\refint\Application.dll
 C:\Users\victo\source\repos\Gameout-Api\Application\obj\Debug\net6.0\Application.pdb
 C:\Users\victo\source\repos\Gameout-Api\Application\obj\Debug\net6.0\ref\Application.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Application\obj\Debug\net6.0\Application.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Application\obj\Debug\net6.0\Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Application\obj\Debug\net6.0\Application.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Application\obj\Debug\net6.0\Application.AssemblyInfo.cs
+C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Application\obj\Debug\net6.0\Application.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Application\obj\Debug\net6.0\Application.sourcelink.json
+C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Application\obj\Debug\net6.0\Application.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Application\obj\Debug\net6.0\refint\Application.dll
+C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Application\obj\Debug\net6.0\Application.pdb

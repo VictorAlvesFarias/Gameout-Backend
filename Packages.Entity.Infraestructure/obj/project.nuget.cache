@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Hr2f4vLB/vk=",
+  "dgSpecHash": "SuVW2BYlStc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\victo\\source\\repos\\Gameout-Api\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj",
+  "projectFilePath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.entityframeworkcore\\6.0.36\\microsoft.entityframeworkcore.6.0.36.nupkg.sha512",
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\6.0.36\\microsoft.entityframeworkcore.abstractions.6.0.36.nupkg.sha512",

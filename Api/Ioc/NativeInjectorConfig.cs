@@ -1,6 +1,5 @@
 ﻿using Application.Services.AppFileLogService;
 using Application.Services.AppFileService;
-using Application.Workers.AppFileWorkers;
 using Infrastructure.Context;
 using Infrastructure.Factories;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Infrastructure.Mediators;
 using Packages.Entity.Infraestructure.Mediators;
 using Domain.Entitites;
+using Application.Workers;
 
 namespace ASP.NET_Core_Template.Ioc
 {
@@ -35,12 +35,7 @@ namespace ASP.NET_Core_Template.Ioc
             
             services.AddSingleton<WebSocketWorker>();
             services.AddHostedService(provider => provider.GetRequiredService<WebSocketWorker>());
-
-            services.AddHostedService<AppFileUpdateWorker>();
-            services.AddHostedService<AppFileSyncWorker>();
-            services.AddHostedService<AppFileErrorWorker>();
-            services.AddHostedService<AppFileStatusWorker>();
-            services.AddHostedService<AppFileValidateStatusWorker>();
+            services.AddHostedService(provider => provider.GetRequiredService<AppFileWorker>());
         }
     }
 }
