@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "dx2dNDeI5ew=",
+  "dgSpecHash": "zNhYUlu+X6A=",
   "success": true,
-  "projectFilePath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Api\\Api.csproj",
+  "projectFilePath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Api\\Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\victo\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.aspnetcore.authentication\\2.3.0\\microsoft.aspnetcore.authentication.2.3.0.nupkg.sha512",

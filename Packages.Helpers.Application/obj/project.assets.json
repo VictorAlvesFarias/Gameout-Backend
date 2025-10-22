@@ -722,11 +722,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Application\\Packages.Helpers.Application.csproj",
+      "projectUniqueName": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Application\\Packages.Helpers.Application.csproj",
       "projectName": "Packages.Helpers.Application",
-      "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Application\\Packages.Helpers.Application.csproj",
+      "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Application\\Packages.Helpers.Application.csproj",
       "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Application\\obj\\",
+      "outputPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Application\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -748,8 +748,8 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj": {
-              "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj"
+            "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj": {
+              "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Infraestructure\\Packages.Helpers.Infraestructure.csproj"
             }
           }
         }
@@ -764,7 +764,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net6.0": {
@@ -791,7 +791,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
       }
     }
   }

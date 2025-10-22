@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "2i4+bHg/s1k=",
+  "dgSpecHash": "9R0WqYbWu4c=",
   "success": true,
-  "projectFilePath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Application\\Application.csproj",
+  "projectFilePath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Application\\Application.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.aspnetcore.authentication\\2.3.0\\microsoft.aspnetcore.authentication.2.3.0.nupkg.sha512",
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.3.0\\microsoft.aspnetcore.authentication.abstractions.2.3.0.nupkg.sha512",

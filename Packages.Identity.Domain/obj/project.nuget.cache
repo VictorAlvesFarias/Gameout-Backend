@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "skzAD/APddk=",
+  "dgSpecHash": "F6ALR64A1h8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj",
+  "projectFilePath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\6.0.36\\microsoft.aspnetcore.cryptography.internal.6.0.36.nupkg.sha512",
     "C:\\Users\\victo\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\6.0.36\\microsoft.aspnetcore.cryptography.keyderivation.6.0.36.nupkg.sha512",

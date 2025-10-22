@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Infrastructure\\Infrastructure.csproj": {}
+    "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Infrastructure\\Infrastructure.csproj": {}
   },
   "projects": {
-    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Domain\\Domain.csproj": {
+    "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Domain\\Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Domain\\Domain.csproj",
+        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Domain\\Domain.csproj",
         "projectName": "Domain",
-        "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Domain\\Domain.csproj",
+        "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Domain\\Domain.csproj",
         "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Domain\\obj\\",
+        "outputPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -33,14 +33,14 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
-                "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj"
+              "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
+                "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj"
               },
-              "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj": {
-                "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj"
+              "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj": {
+                "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj"
               },
-              "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj": {
-                "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj"
+              "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj": {
+                "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj"
               }
             }
           }
@@ -55,7 +55,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net6.0": {
@@ -88,18 +88,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Infrastructure\\Infrastructure.csproj": {
+    "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Infrastructure\\Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Infrastructure\\Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Infrastructure\\Infrastructure.csproj",
         "projectName": "Infrastructure",
-        "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Infrastructure\\Infrastructure.csproj",
+        "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Infrastructure\\Infrastructure.csproj",
         "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Infrastructure\\obj\\",
+        "outputPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -121,11 +121,11 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Domain\\Domain.csproj": {
-                "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Domain\\Domain.csproj"
+              "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Domain\\Domain.csproj": {
+                "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Domain\\Domain.csproj"
               },
-              "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj": {
-                "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj"
+              "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj": {
+                "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj"
               }
             }
           }
@@ -140,7 +140,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net6.0": {
@@ -195,18 +195,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
+    "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj",
         "projectName": "Packages.Entity.Domain",
-        "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj",
+        "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj",
         "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\obj\\",
+        "outputPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -240,7 +240,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net6.0": {
@@ -261,18 +261,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj": {
+    "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj",
+        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj",
         "projectName": "Packages.Entity.Infraestructure",
-        "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj",
+        "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Infraestructure\\Packages.Entity.Infraestructure.csproj",
         "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Infraestructure\\obj\\",
+        "outputPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Infraestructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -294,8 +294,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
-                "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj"
+              "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
+                "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj"
               }
             }
           }
@@ -310,7 +310,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net6.0": {
@@ -337,18 +337,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj": {
+    "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj",
         "projectName": "Packages.Helpers.Domain",
-        "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj",
+        "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Domain\\Packages.Helpers.Domain.csproj",
         "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Helpers.Domain\\obj\\",
+        "outputPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Helpers.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -382,7 +382,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net6.0": {
@@ -403,18 +403,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj": {
+    "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj",
         "projectName": "Packages.Identity.Domain",
-        "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj",
+        "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Identity.Domain\\Packages.Identity.Domain.csproj",
         "packagesPath": "C:\\Users\\victo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Identity.Domain\\obj\\",
+        "outputPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Identity.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -436,8 +436,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
-                "projectPath": "C:\\Users\\victo\\Downloads\\Nova pasta\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj"
+              "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj": {
+                "projectPath": "C:\\Users\\victo\\Downloads\\Gameout\\Gameout-Backend\\Packages.Entity.Domain\\Packages.Entity.Domain.csproj"
               }
             }
           }
@@ -452,7 +452,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net6.0": {
@@ -479,7 +479,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     }
