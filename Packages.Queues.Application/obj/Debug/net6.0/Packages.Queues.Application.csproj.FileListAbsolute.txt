@@ -32,3 +32,15 @@ C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Packages.Queues.Application\
 C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\refint\Packages.Queues.Application.dll
 C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\Packages.Queues.Application.pdb
 C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\ref\Packages.Queues.Application.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\bin\Debug\net6.0\Packages.Queues.Application.deps.json
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\bin\Debug\net6.0\Packages.Queues.Application.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\bin\Debug\net6.0\Packages.Queues.Application.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\Packages.Queues.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\Packages.Queues.Application.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\Packages.Queues.Application.AssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\Packages.Queues.Application.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\Packages.Queues.Application.sourcelink.json
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\Packages.Queues.Application.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\refint\Packages.Queues.Application.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\Packages.Queues.Application.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Packages.Queues.Application\obj\Debug\net6.0\ref\Packages.Queues.Application.dll

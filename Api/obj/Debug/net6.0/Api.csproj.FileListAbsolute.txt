@@ -722,3 +722,14 @@ C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Api\obj\Debug\net6.0\Api.sou
 C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Api\obj\Debug\net6.0\Api.dll
 C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Api\obj\Debug\net6.0\refint\Api.dll
 C:\Users\victo\Downloads\Nova pasta\Gameout-Backend\Api\obj\Debug\net6.0\Api.pdb
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.csproj.AssemblyReference.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.AssemblyInfoInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.AssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.csproj.CoreCompileInputs.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.sourcelink.json
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\refint\Api.dll
+C:\Users\victo\Downloads\Gameout\Gameout-Backend\Api\obj\Debug\net6.0\Api.pdb

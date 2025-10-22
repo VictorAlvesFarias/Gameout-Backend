@@ -10,6 +10,7 @@ using Packages.Helpers.Application.Dtos;
 using Packages.Queues.Application.Services;
 using Packages.Ws.Application.Dtos;
 using Packages.Ws.Application.Workers;
+using System.IO.Compression;
 
 namespace Application.Services.AppFileService
 {
@@ -294,11 +295,19 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
+            var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e => 
+                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "Authorization") &&
+                e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
+            ).Value;
 
-            _queue.EnqueueAsync(new AppFileUpdateRequestMessage()
+            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
             {
-                AppStoredFileId = appStoredFileAddResult.Id,
-                Path = appFile.Path
+                Event = "SingleSync",
+                Body = new AppFileUpdateRequestMessage()
+                {
+                    AppStoredFileId = appStoredFileAddResult.Id,
+                    Path = appFile.Path
+                }
             });
 
             var client = _webSocketWorker.GetClients().FirstOrDefault(e => e.Value.Cookies.Any(e => e.Value == appFile.UserId)).Value;
@@ -580,11 +589,19 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            // Enviar para fila de processamento
-            _queue.EnqueueAsync(new AppFileUpdateRequestMessage()
+            var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e =>
+                e.Value.Headers.Any(e => e.Value == appStoredFile.UserId && e.Key == "Authorization") &&
+                e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
+            ).Value;
+
+            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
             {
-                AppStoredFileId = appStoredFileId,
-                Path = appStoredFile.AppFile.Path
+                Event = "SingleSync",
+                Body = new AppFileUpdateRequestMessage()
+                {
+                    AppStoredFileId = appStoredFileId,
+                    Path = appStoredFile.AppFile.Path
+                }
             });
 
             _appFileLogService.LogActionAsync(
@@ -646,11 +663,22 @@ namespace Application.Services.AppFileService
         public DefaultResponse CheckProcessingStatus(int appStoredFileId)
         {
             var response = new DefaultResponse(true);
+            var appStoredFile = _appStoredFileRepository.Get()
+                .FirstOrDefault(e => e.Id == appStoredFileId);
 
-            _statusCheckQueue.EnqueueAsync(new AppFileStatusCheckRequestMessage()
+            var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e =>
+                e.Value.Headers.Any(e => e.Value == appStoredFile.UserId && e.Key == "Authorization") &&
+                e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
+            ).Value;
+
+            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
             {
-                AppStoredFileId = appStoredFileId,
-                RequestId = Guid.NewGuid().ToString()
+                Event = "IsProcessing",
+                Body = new AppFileStatusCheckRequestMessage()
+                {
+                    AppStoredFileId = appStoredFileId,
+                    RequestId = Guid.NewGuid().ToString()
+                }
             });
 
             return response;
@@ -759,10 +787,20 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            _validateStatusCheckQueue.EnqueueAsync(new AppFileValidateStatusRequest()
+            var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e =>
+                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "Authorization") &&
+                e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
+            ).Value;
+
+            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
             {
-                AppFile = appFile
+                Event = "ValidateSync",
+                Body = new AppFileValidateStatusRequest()
+                {
+                    AppFile = appFile
+                }
             });
+
 
             return response;
         }
