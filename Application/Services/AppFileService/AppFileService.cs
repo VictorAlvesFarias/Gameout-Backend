@@ -182,6 +182,17 @@ namespace Application.Services.AppFileService
                 recordName: req.Name
             );
 
+            var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e =>
+                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "Authorization") &&
+                e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
+            ).Value;
+
+            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
+            {
+                Event = "SetEvents",
+                Body = ""
+            });
+
             response.Data = req;
 
             return response;
