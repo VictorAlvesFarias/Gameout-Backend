@@ -11,6 +11,7 @@ namespace Packages.Ws.Application.Workers
 
 
 using Packages.Ws.Application.Dtos;
+    using System;
 
     public class WebSocketWorker : BackgroundService
     {
@@ -492,7 +493,9 @@ using Packages.Ws.Application.Dtos;
 
         public virtual ValidateInviteTokenResult ValidateInviteToken(string token)
         {
-            if (!_pendingInvites.TryGetValue(token, out var invite))
+            var invitereq = GetAvailableInstance(Guid.Parse(token));
+
+            if (!_pendingInvites.TryGetValue(invitereq.Token, out var invite))
             {
                 _logger.LogWarning("ValidateInviteToken: token not found: {Token}", token);
                 return new ValidateInviteTokenResult(false, "Token not found.", null);

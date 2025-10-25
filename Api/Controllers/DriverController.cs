@@ -23,7 +23,7 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         [Authorize]
-        [HttpPost("upload-file")]
+        [HttpPost("stream-file")]
         public ActionResult<DefaultResponse> UploadFile(int appStoredFileId,int originalFileSize,IFormFile file)
         {
             using var memoryStream = new MemoryStream();

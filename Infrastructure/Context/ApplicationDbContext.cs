@@ -101,7 +101,27 @@ namespace Infrastructure.Context
 
         public string GetUserId()
         {
-            return _contextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var httpContext = _contextAccessor.HttpContext;
+
+            if (httpContext is null)
+                return null;
+
+            var token = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!string.IsNullOrEmpty(token))
+                return token;
+
+            if (httpContext.Request.Headers.TryGetValue("Authorization", out var headerTokenUserId))
+            {
+                return headerTokenUserId;
+            }
+
+            if (httpContext.Request.Cookies.TryGetValue("Authorization", out var cookieTokenUserId))
+            {
+                return cookieTokenUserId;
+            }
+
+            return null;
         }
     }
 }

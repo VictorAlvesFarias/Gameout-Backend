@@ -740,6 +740,7 @@ namespace Application.Services.AppFileService
         public DefaultResponse StatusUpdate(AppFileValidateStatusResponse req)
         {
             var response = new DefaultResponse(true);
+            var allAppFiles = _appFileRepository.Get().ToList();
             var appFile = _appFileRepository.Get().FirstOrDefault(e => e.Id == req.AppFileId);
 
             if (appFile is null)
@@ -798,9 +799,11 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e =>
-                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "Authorization") &&
-                e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
+            var clients = _webSocketWorker.GetClients();
+                
+            var clientDriver = clients.FirstOrDefault(e =>
+                e.Value.Headers.Any(e => e.Value.Equals(appFile.UserId) && e.Key.Equals("Authorization")) &&
+                e.Value.Headers.Any(e => e.Value.Equals("drive") && e.Key.Equals("type"))
             ).Value;
 
             _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
