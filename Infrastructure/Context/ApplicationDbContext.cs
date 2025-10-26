@@ -104,21 +104,25 @@ namespace Infrastructure.Context
             var httpContext = _contextAccessor.HttpContext;
 
             if (httpContext is null)
-                return null;
-
-            var token = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!string.IsNullOrEmpty(token))
-                return token;
-
-            if (httpContext.Request.Headers.TryGetValue("Authorization", out var headerTokenUserId))
             {
-                return headerTokenUserId;
+                return null;
             }
 
-            if (httpContext.Request.Cookies.TryGetValue("Authorization", out var cookieTokenUserId))
+            var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!string.IsNullOrEmpty(userId))
             {
-                return cookieTokenUserId;
+                return userId;
+            }
+
+            if (httpContext.Request.Cookies.TryGetValue("id", out userId))
+            {
+                return userId;
+            }
+
+            if (httpContext.Request.Headers.TryGetValue("id", out var headerValue))
+            {
+                return headerValue.ToString();
             }
 
             return null;

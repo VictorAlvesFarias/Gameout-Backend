@@ -6,6 +6,5 @@ namespace Packages.Entity.Infraestructure.Mediators
     {
         IQueryable<TEntity> Handle(IQueryable<TEntity> query, DbContext context, bool ignoreUserId);
         void Handle(TEntity entity, DbContext context);
-        void Handle(TEntity entity);
     }
 }

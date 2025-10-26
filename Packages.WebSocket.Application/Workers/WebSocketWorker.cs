@@ -8,9 +8,7 @@ using System.Text.Json;
 
 namespace Packages.Ws.Application.Workers
 {
-
-
-using Packages.Ws.Application.Dtos;
+    using Packages.Ws.Application.Dtos;
     using System;
 
     public class WebSocketWorker : BackgroundService
@@ -18,7 +16,6 @@ using Packages.Ws.Application.Dtos;
         private readonly ILogger<WebSocketWorker> _logger;
         private readonly HttpListener _listener;
         private readonly ConcurrentDictionary<string, List<WebSocketSubscription>> _subscriptions;
-        private readonly ConcurrentDictionary<Guid, WebSocketClient> _clients;
         private readonly ConcurrentDictionary<string, WebSocketInstance> _instances;
         private readonly ConcurrentDictionary<string, ConnectionInvite> _pendingInvites;
         private readonly int _basePort;
@@ -35,7 +32,6 @@ using Packages.Ws.Application.Dtos;
             string baseUrl = "ws://localhost"
         )
         {
-            _clients = new ConcurrentDictionary<Guid, WebSocketClient>();
             _logger = logger;
             _listener = new HttpListener();
             _subscriptions = new ConcurrentDictionary<string, List<WebSocketSubscription>>();
@@ -52,30 +48,6 @@ using Packages.Ws.Application.Dtos;
         }
 
         #region BackgroundService Methods
-
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            try
-            {
-                _listener.Stop();
-            }
-            catch
-            {
-            }
-
-            foreach (var kv in _clients)
-            {
-                try
-                {
-                    kv.Value.Socket.Dispose();
-                }
-                catch
-                {
-                }
-            }
-        }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -316,31 +288,26 @@ using Packages.Ws.Application.Dtos;
                     _ = Task.Run(async () =>
                     {
                         var wsContext = await context.AcceptWebSocketAsync(null);
-                        var ws = wsContext.WebSocket;
-                        var clientId = Guid.NewGuid();
-                        var headers = context.Request.Headers.AllKeys.ToDictionary(k => k, k => context.Request.Headers[k]);
-                        var cookies = context.Request.Cookies.Cast<Cookie>().ToDictionary(c => c.Name, c => c.Value);
-
-                        _logger.LogInformation("Accepted WebSocket connection. Instance={InstanceId}, ClientId={ClientId}, RemoteEndPoint={Remote}", instance.InstanceId, clientId, context.Request.RemoteEndPoint);
-                        _logger.LogDebug("Connection details: HeaderCount={HeaderCount}, CookieCount={CookieCount}", headers.Count, cookies.Count);
-
-                        instance.Clients[clientId] = new WebSocketClient()
+                        var client = new WebSocketClient()
                         {
-                            Headers = headers,
-                            Id = clientId,
-                            Socket = ws,
-                            Cookies = cookies
+                            Headers = context.Request.Headers.AllKeys.ToDictionary(k => k, k => context.Request.Headers[k]),
+                            Id = Guid.NewGuid(),
+                            Socket = wsContext.WebSocket,
+                            Cookies = context.Request.Cookies.Cast<Cookie>().ToDictionary(c => c.Name, c => c.Value)
                         };
 
-                        _logger.LogInformation("Client {ClientId} added to instance {InstanceId}. CurrentConnections={Connections}", clientId, instance.InstanceId, instance.Clients.Count);
+                        _logger.LogInformation("Accepted WebSocket connection. Instance={InstanceId}, ClientId={ClientId}, RemoteEndPoint={Remote}", instance.InstanceId, client.Id, context.Request.RemoteEndPoint);
+                        _logger.LogDebug("Connection details: HeaderCount={HeaderCount}, CookieCount={CookieCount}", client.Headers.Count, client.Cookies.Count);
+                        _logger.LogInformation("Client {ClientId} added to instance {InstanceId}. CurrentConnections={Connections}", client.Id, instance.InstanceId, instance.Clients.Count);
 
-                        await HandleClientAsync(instance.Clients[clientId], instance);
+                        await HandleClientAsync(client, instance);
                     });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro na instância {InstanceId}", instance.InstanceId);
+
                 instance.IsActive = false;
             }
             finally
@@ -365,11 +332,14 @@ using Packages.Ws.Application.Dtos;
                     authResponse.Message,
                     CancellationToken.None
                 );
+
                 handleClientAsyncParams.Socket.Dispose();
+
                 return;
             }
 
             var validateInviteToken = ValidateInviteToken(authResponse.Token);
+
             if (!validateInviteToken.Valid)
             {
                 await handleClientAsyncParams.Socket.CloseAsync(
@@ -377,23 +347,24 @@ using Packages.Ws.Application.Dtos;
                     validateInviteToken.Message,
                     CancellationToken.None
                 );
+
                 handleClientAsyncParams.Socket.Dispose();
+
                 return;
             }
 
+            instance.Clients[handleClientAsyncParams.Id] = handleClientAsyncParams;
+
             MarkInviteAsUsed(validateInviteToken.Invite.Token);
-            RegisterClient(handleClientAsyncParams.Id, validateInviteToken.Invite.InstanceId);
-
-            var ws = handleClientAsyncParams.Socket;
-
-            while (ws.State == WebSocketState.Open)
+            
+            while (handleClientAsyncParams.Socket.State == WebSocketState.Open)
             {
                 using var ms = new MemoryStream();
                 WebSocketReceiveResult result;
 
                 do
                 {
-                    result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    result = await handleClientAsyncParams.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                     ms.Write(buffer, 0, result.Count);
                 }
                 while (!result.EndOfMessage && !result.CloseStatus.HasValue);
@@ -401,18 +372,20 @@ using Packages.Ws.Application.Dtos;
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
                     if (instance != null)
+                    {
                         instance.Clients.TryRemove(handleClientAsyncParams.Id, out _);
-                    else
-                        _clients.TryRemove(handleClientAsyncParams.Id, out _);
+                    }
 
-                    UnregisterClient(handleClientAsyncParams.Id);
-                    await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "closed", CancellationToken.None);
+                    await handleClientAsyncParams.Socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "closed", CancellationToken.None);
+                    
                     break;
                 }
 
                 ms.Seek(0, SeekOrigin.Begin);
+
                 var message = Encoding.UTF8.GetString(ms.ToArray());
-                RedirectQueues(message, ws, handleClientAsyncParams.Headers);
+
+                RedirectQueues(message, handleClientAsyncParams);
             }
 
             handleClientAsyncParams.Socket.Dispose();
@@ -428,7 +401,7 @@ using Packages.Ws.Application.Dtos;
             {
                 TotalInstances = _instances.Count,
                 ActiveInstances = _instances.Values.Count(i => i.IsActive),
-                TotalClients = _clients.Count,
+                TotalClients = _instances.SelectMany(e=> e.Value.Clients).Count(),
                 PendingInvites = _pendingInvites.Count,
                 Instances = _instances.Values.Select(i => new
                 {
@@ -446,7 +419,7 @@ using Packages.Ws.Application.Dtos;
 
         #region Virtual Methods
 
-        public virtual void RedirectQueues(string message, WebSocket ws, Dictionary<string, string> headers)
+        public virtual void RedirectQueues(string message, WebSocketClient client)
         {
             _logger.LogDebug("RedirectQueues: received message: {Message}", message);
 
@@ -455,6 +428,7 @@ using Packages.Ws.Application.Dtos;
             if (!doc.RootElement.TryGetProperty("event", out var typeProp))
             {
                 _logger.LogWarning("RedirectQueues: message does not contain 'event' property");
+
                 return;
             }
 
@@ -463,6 +437,7 @@ using Packages.Ws.Application.Dtos;
             if (string.IsNullOrWhiteSpace(type))
             {
                 _logger.LogWarning("RedirectQueues: event type is null or whitespace in message");
+
                 return;
             }
 
@@ -476,15 +451,17 @@ using Packages.Ws.Application.Dtos;
                     {
                         var webSocketRequest = JsonSerializer.Deserialize<WebSocketRequest>(message);
 
-                        _ = Task.Run(() => h.Handler(ws, webSocketRequest));
+                        _ = Task.Run(() => h.Handler(client.Socket, webSocketRequest));
+
                         _logger.LogDebug("RedirectQueues: handler queued for event '{EventType}'", type);
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "RedirectQueues: handler for event '{EventType}' threw an exception", type);
+
                         if (h.HandlerError != null)
                         {
-                            _ = Task.Run(() => h.HandlerError(ws, ex));
+                            _ = Task.Run(() => h.HandlerError(client.Socket, ex));
                         }
                     }
                 }
@@ -523,9 +500,9 @@ using Packages.Ws.Application.Dtos;
         {
             var token = "";
 
-            if (headers.ContainsKey("Authorization"))
+            if (headers.ContainsKey("id"))
             {
-                token = headers["Authorization"];
+                token = headers["id"];
                 _logger.LogDebug("Authentication: found token in Authorization header");
             }
 
@@ -549,9 +526,9 @@ using Packages.Ws.Application.Dtos;
                 };
             }
 
-            // Se chegou aqui, encontrou um token
             _logger.LogInformation("Authentication: successful with token from {Source}",
-                headers.ContainsKey("Authorization") ? "Authorization header" : "id cookie");
+
+            headers.ContainsKey("Authorization") ? "Authorization header" : "id cookie");
 
             return new WebSocketAuthResponse()
             {
@@ -574,24 +551,6 @@ using Packages.Ws.Application.Dtos;
             }
         }
 
-        private void RegisterClient(Guid clientId, string instanceId)
-        {
-            var registry = new WebSocketClient
-            {
-                Id = clientId,
-                InstanceId = instanceId
-            };
-
-            _clients[clientId] = registry;
-        }
-
-        private void UnregisterClient(Guid clientId)
-        {
-            if (_clients.TryRemove(clientId, out var registry))
-            {
-                _logger.LogInformation("Cliente {ClientId} desregistrado da instância {InstanceId}", clientId, registry.InstanceId);
-            }
-        }
 
         private void CleanExpiredInvites()
         {

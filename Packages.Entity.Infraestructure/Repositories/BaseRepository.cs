@@ -32,7 +32,7 @@ namespace Packages.Entity.Infraestructure.Repositories
 
         public bool Remove(TEntity item)
         {
-            _mediator.Handle(item);
+            _mediator.Handle(item, _context);
 
             _context.Remove(item);
             _context.SaveChanges();
@@ -44,7 +44,7 @@ namespace Packages.Entity.Infraestructure.Repositories
         {
             var entity = _entity.Find(id);
 
-            _mediator.Handle(entity);
+            _mediator.Handle(entity, _context);
 
             if (entity != null)
             {
@@ -59,7 +59,7 @@ namespace Packages.Entity.Infraestructure.Repositories
 
         public bool Update(TEntity entity)
         {
-            _mediator.Handle(entity);
+            _mediator.Handle(entity, _context);
 
             _entity.Update(entity);
             _context.SaveChanges();

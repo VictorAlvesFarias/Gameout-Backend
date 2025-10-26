@@ -183,8 +183,8 @@ namespace Application.Services.AppFileService
             );
 
             var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e =>
-                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "Authorization") &&
-                e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
+                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
+                e.Value.Headers.Any(e => e.Value == "drive" && e.Key == "type")
             ).Value;
 
             _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
@@ -307,21 +307,27 @@ namespace Application.Services.AppFileService
             }
 
             var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e => 
-                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "Authorization") &&
-                e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
+                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
+                e.Value.Headers.Any(e => e.Value == "drive" && e.Key == "type")
             ).Value;
 
-            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
+            if (clientDriver is not null)
             {
-                Event = "SingleSync",
-                Body = new AppFileUpdateRequestMessage()
+                _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
                 {
-                    AppStoredFileId = appStoredFileAddResult.Id,
-                    Path = appFile.Path
-                }
-            });
+                    Event = "SingleSync",
+                    Body = new AppFileUpdateRequestMessage()
+                    {
+                        AppStoredFileId = appStoredFileAddResult.Id,
+                        Path = appFile.Path
+                    }
+                });
+            }
 
-            var client = _webSocketWorker.GetClients().FirstOrDefault(e => e.Value.Cookies.Any(e => e.Value == appFile.UserId)).Value;
+            var client = _webSocketWorker.GetClients().FirstOrDefault(e =>
+                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
+                e.Value.Headers.Any(e => e.Value == "web" && e.Key == "type")
+            ).Value;
 
             if (client is not null)
             {
@@ -443,7 +449,10 @@ namespace Application.Services.AppFileService
                 }
             }
 
-            var client = _webSocketWorker.GetClients().FirstOrDefault(e => e.Value.Cookies.Any(e => e.Value == appStoredFile.UserId)).Value;
+            var client = _webSocketWorker.GetClients().FirstOrDefault(e =>
+                e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
+                e.Value.Headers.Any(e => e.Value == "web" && e.Key == "type")
+            ).Value;
 
             if (client is not null)
             {
@@ -558,7 +567,10 @@ namespace Application.Services.AppFileService
                 );
 
                 // Notificar via WebSocket
-                var client = _webSocketWorker.GetClients().FirstOrDefault(e => e.Value.Cookies.Any(e => e.Value == appStoredFile.UserId)).Value;
+                var client = _webSocketWorker.GetClients().FirstOrDefault(e =>
+                    e.Value.Headers.Any(e => e.Value == appStoredFile.UserId && e.Key == "id") &&
+                    e.Value.Headers.Any(e => e.Value == "web" && e.Key == "type")
+                ).Value;
 
                 if (client is not null)
                 {
@@ -605,15 +617,18 @@ namespace Application.Services.AppFileService
                 e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
             ).Value;
 
-            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
+            if (clientDriver is not null)
             {
-                Event = "SingleSync",
-                Body = new AppFileUpdateRequestMessage()
+                _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
                 {
-                    AppStoredFileId = appStoredFileId,
-                    Path = appStoredFile.AppFile.Path
-                }
-            });
+                    Event = "SingleSync",
+                    Body = new AppFileUpdateRequestMessage()
+                    {
+                        AppStoredFileId = appStoredFileId,
+                        Path = appStoredFile.AppFile.Path
+                    }
+                });
+            }
 
             _appFileLogService.LogActionAsync(
                 AppFileActionType.RequestSync,
@@ -682,15 +697,18 @@ namespace Application.Services.AppFileService
                 e.Value.Headers.Any(e => e.Value == "Driver" && e.Key == "Type")
             ).Value;
 
-            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
+            if (clientDriver is not null)
             {
-                Event = "IsProcessing",
-                Body = new AppFileStatusCheckRequestMessage()
+                _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
                 {
-                    AppStoredFileId = appStoredFileId,
-                    RequestId = Guid.NewGuid().ToString()
-                }
-            });
+                    Event = "IsProcessing",
+                    Body = new AppFileStatusCheckRequestMessage()
+                    {
+                        AppStoredFileId = appStoredFileId,
+                        RequestId = Guid.NewGuid().ToString()
+                    }
+                });
+            }
 
             return response;
         }
@@ -722,7 +740,10 @@ namespace Application.Services.AppFileService
                     );
                 }
 
-                var client = _webSocketWorker.GetClients().FirstOrDefault(e => e.Value.Cookies.Any(e => e.Value == appStoredFile.UserId)).Value;
+                var client = _webSocketWorker.GetClients().FirstOrDefault(e =>
+                    e.Value.Headers.Any(e => e.Value == appStoredFile.UserId && e.Key == "id") &&
+                    e.Value.Headers.Any(e => e.Value == "web" && e.Key == "type")
+                ).Value;
 
                 if (client is not null)
                 {
@@ -773,7 +794,11 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            var client = _webSocketWorker.GetClients().FirstOrDefault(e => e.Value.Cookies.Any(e => e.Value == appFile.UserId)).Value;
+            var allClients = _webSocketWorker.GetClients();
+            var client = allClients.FirstOrDefault(e =>
+                e.Value.Cookies.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
+                e.Value.Cookies.Any(e => e.Value == "web" && e.Key == "type")
+            ).Value;
 
             if (client is not null)
             {
@@ -802,20 +827,21 @@ namespace Application.Services.AppFileService
             var clients = _webSocketWorker.GetClients();
                 
             var clientDriver = clients.FirstOrDefault(e =>
-                e.Value.Headers.Any(e => e.Value.Equals(appFile.UserId) && e.Key.Equals("Authorization")) &&
+                e.Value.Headers.Any(e => e.Value.Equals(appFile.UserId) && e.Key.Equals("id")) &&
                 e.Value.Headers.Any(e => e.Value.Equals("drive") && e.Key.Equals("type"))
             ).Value;
 
-            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
+            if (clientDriver is not null)
             {
-                Event = "ValidateSync",
-                Body = new AppFileValidateStatusRequest()
+                _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
                 {
-                    AppFile = appFile
-                }
-            });
-
-
+                    Event = "ValidateSync",
+                    Body = new AppFileValidateStatusRequest()
+                    {
+                        AppFile = appFile
+                    }
+                });
+            }
             return response;
         }
     }
