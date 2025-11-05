@@ -1,8 +1,8 @@
 ﻿using Domain.Entitites.ApplicationContext;
 using Domain.Queues.AppFileDtos;
 using Infrastructure.Context;
-using Packages.Helpers.Application.Dtos;
-using Packages.Queues.Application.Services;
+using Web.Api.Toolkit.Helpers.Application.Dtos;
+using Web.Api.Toolkit.Queues.Application.Services;
 using System.IO.Compression;
 
 namespace Drivers.Services.AppFileWatcherService

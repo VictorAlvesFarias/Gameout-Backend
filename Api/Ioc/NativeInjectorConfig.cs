@@ -5,13 +5,13 @@ using Infrastructure.Context;
 using Infrastructure.Factories;
 using Infrastructure.Mediators;
 using Microsoft.AspNetCore.Identity;
-using Packages.Entity.Infraestructure.Factories;
-using Packages.Entity.Infraestructure.Mediators;
-using Packages.Entity.Infraestructure.Repositories;
-using Packages.Identity.Application.Extensions;
-using Packages.Identity.Application.Services;
-using Packages.Queues.Application.Services;
-using Packages.Ws.Application.Workers;
+using Web.Api.Toolkit.Entity.Infraestructure.Factories;
+using Web.Api.Toolkit.Entity.Infraestructure.Mediators;
+using Web.Api.Toolkit.Entity.Infraestructure.Repositories;
+using Web.Api.Toolkit.Identity.Application.Extensions;
+using Web.Api.Toolkit.Identity.Application.Services;
+using Web.Api.Toolkit.Identity.Domain.Entities;
+using Web.Api.Toolkit.Ws.Application.Workers;
 
 namespace ASP.NET_Core_Template.Ioc
 {
@@ -20,7 +20,6 @@ namespace ASP.NET_Core_Template.Ioc
         public static void RegisterServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<ApplicationContext>();
-            services.AddSingleton(typeof(IQueueService<>), typeof(QueueService<>));
 
             services.AddScoped<IDatabaseContextFactory, DbContextFactory>();
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));

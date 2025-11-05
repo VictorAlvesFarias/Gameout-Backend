@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Packages.Identity.Application.Configuration;
+using Web.Api.Toolkit.Identity.Application.Configuration;
 using System.Text;
 
 namespace ASP.NET_Core_Template.Setups

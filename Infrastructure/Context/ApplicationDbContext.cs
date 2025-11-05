@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Web.Api.Toolkit.Identity.Domain.Entities;
 
 namespace Infrastructure.Context
 {

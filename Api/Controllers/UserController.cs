@@ -1,9 +1,9 @@
-﻿using Application.Dtos.User;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Packages.Helpers.Application.Dtos;
-using Packages.Identity.Application.Services;
-using Packages.Helpers.Api.Extensions;
+using Web.Api.Toolkit.Helpers.Application.Dtos;
+using Web.Api.Toolkit.Identity.Application.Services;
+using Web.Api.Toolkit.Helpers.Api.Extensions;
+using Web.Api.Toolkit.Identity.Application.Dtos;
 
 namespace ASP.NET_Core_Template.Controllers
 {

@@ -1,10 +1,10 @@
 ﻿using Infrastructure.Context;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Packages.Entity.Infraestructure.Factories;
-using Packages.Entity.Infraestructure.Mediators;
-using Packages.Entity.Infraestructure.Repositories;
-using Packages.Identity.Domain.Entities;
+using Web.Api.Toolkit.Entity.Infraestructure.Factories;
+using Web.Api.Toolkit.Entity.Infraestructure.Mediators;
+using Web.Api.Toolkit.Entity.Infraestructure.Repositories;
+using Web.Api.Toolkit.Identity.Domain.Entities;
 using System;
 using System.Security.Claims;
 

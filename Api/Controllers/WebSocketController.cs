@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Packages.Ws.Application.Dtos;
-using Packages.Ws.Application.Workers;
+using Web.Api.Toolkit.Ws.Application.Dtos;
+using Web.Api.Toolkit.Ws.Application.Workers;
 using System.Security.Claims;
 
 namespace ASP.NET_Core_Template.Controllers

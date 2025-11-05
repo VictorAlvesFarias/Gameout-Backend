@@ -13,17 +13,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Helpers.Application" Version="1.0.2" />
+    <PackageReference Include="Identity.Application" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.36" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.36" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.8.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.35.1" />
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Application" Version="1.0.4" />
+    <PackageReference Include="Web.Api.Toolkit.Identity.Application" Version="1.0.4" />
+    <PackageReference Include="Web.Api.Toolkit.Ws.Application" Version="1.0.4" />
+    <PackageReference Include="Ws.Application" Version="1.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\Packages.Helpers.Application\Packages.Helpers.Application.csproj" />
-    <ProjectReference Include="..\Packages.Queues.Application\Packages.Queues.Application.csproj" />
-    <ProjectReference Include="..\Packages.WebSocket.Application\Packages.Ws.Application.csproj" />
   </ItemGroup>
 
 </Project>

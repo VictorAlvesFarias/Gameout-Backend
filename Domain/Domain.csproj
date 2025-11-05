@@ -7,17 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Entity.Domain" Version="1.0.2" />
+    <PackageReference Include="Helpers.Domain" Version="1.0.2" />
+    <PackageReference Include="Identity.Domain" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.36" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.36">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Packages.Entity.Domain\Packages.Entity.Domain.csproj" />
-    <ProjectReference Include="..\Packages.Helpers.Domain\Packages.Helpers.Domain.csproj" />
-    <ProjectReference Include="..\Packages.Identity.Domain\Packages.Identity.Domain.csproj" />
+    <PackageReference Include="Web.Api.Toolkit.Entity.Domain" Version="1.0.4" />
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Domain" Version="1.0.4" />
+    <PackageReference Include="Web.Api.Toolkit.Identity.Domain" Version="1.0.4" />
   </ItemGroup>
 
 </Project>

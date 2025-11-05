@@ -1,5 +1,5 @@
 ﻿using Domain.Entitites.ApplicationContextDb;
-using Packages.Identity.Domain.Entities;
+using Identity.Domain.Entities;
 
 namespace Domain.Entitites.Shared
 {

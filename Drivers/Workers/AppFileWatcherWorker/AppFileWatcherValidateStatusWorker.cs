@@ -2,7 +2,7 @@
 using Drivers.Services.AppFileWatcherService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Packages.Queues.Application.Services;
+using Web.Api.Toolkit.Queues.Application.Services;
 
 namespace Drivers.Workers.AppFileWatcherWorker
 {

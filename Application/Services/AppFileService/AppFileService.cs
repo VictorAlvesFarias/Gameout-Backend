@@ -5,12 +5,10 @@ using Domain.Entitites.Shared;
 using Domain.Queues.AppFileDtos;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
-using Packages.Entity.Infraestructure.Repositories;
-using Packages.Helpers.Application.Dtos;
-using Packages.Queues.Application.Services;
-using Packages.Ws.Application.Dtos;
-using Packages.Ws.Application.Workers;
-using System.IO.Compression;
+using Web.Api.Toolkit.Entity.Infraestructure.Repositories;
+using Web.Api.Toolkit.Helpers.Application.Dtos;
+using Web.Api.Toolkit.Ws.Application.Dtos;
+using Web.Api.Toolkit.Ws.Application.Workers;
 
 namespace Application.Services.AppFileService
 {
@@ -186,12 +184,15 @@ namespace Application.Services.AppFileService
                 e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
                 e.Value.Headers.Any(e => e.Value == "drive" && e.Key == "type")
             ).Value;
-
-            _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
+            
+            if (clientDriver is not null)
             {
-                Event = "SetEvents",
-                Body = ""
-            });
+                _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
+                {
+                    Event = "SetEvents",
+                    Body = ""
+                });
+            }
 
             response.Data = req;
 

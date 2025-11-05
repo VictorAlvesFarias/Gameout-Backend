@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using Packages.Ws.Application.Dtos;
-using Packages.Ws.Application.Workers;
+using Web.Api.Toolkit.Ws.Application.Dtos;
+using Web.Api.Toolkit.Ws.Application.Workers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
