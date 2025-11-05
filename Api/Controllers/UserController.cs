@@ -4,6 +4,7 @@ using Web.Api.Toolkit.Helpers.Application.Dtos;
 using Web.Api.Toolkit.Identity.Application.Services;
 using Web.Api.Toolkit.Helpers.Api.Extensions;
 using Web.Api.Toolkit.Identity.Application.Dtos;
+using Application.Services.Identity;
 
 namespace ASP.NET_Core_Template.Controllers
 {
@@ -33,15 +34,14 @@ namespace ASP.NET_Core_Template.Controllers
             return this.Result(result);
         }
 
-        //TODO: Enable account deletion
-        //[Authorize]
-        //[HttpDelete("/delete-account")]
-        //public async Task<ActionResult<DefaultResponse>> DeleteUser([FromBody] LoginUserRequest loginData)
-        //{
-        //    var result = await _identityService.DeleteUser(loginData);
+        [Authorize]
+        [HttpDelete("/delete-account")]
+        public async Task<ActionResult<DefaultResponse>> DeleteUser([FromBody] LoginUserRequest loginData)
+        {
+            var result = await _identityService.DeleteSignedUser(loginData);
 
-        //    return this.DefaultResult(result);
-        //}
+            return this.DefaultResult(result);
+        }
 
         [Authorize]
         [HttpPut("/update-account")]

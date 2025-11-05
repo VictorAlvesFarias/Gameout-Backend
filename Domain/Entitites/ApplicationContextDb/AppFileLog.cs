@@ -1,6 +1,6 @@
 using Web.Api.Toolkit.Identity.Domain.Entities;
 
-namespace Domain.Entitites.Shared
+namespace Domain.Entitites.ApplicationContextDb
 {
     public class AppFileLog : BaseUserOwnedEntity
     {

@@ -1,9 +1,12 @@
-﻿using Web.Api.Toolkit.Identity.Domain.Entities;
+﻿using Microsoft.AspNetCore.Identity;
 
-namespace Domain.Entitites.ApplicationContextDb
+namespace Web.Api.Toolkit.Identity.Domain.Entities
 {
-    public class ApplicationUser : BaseUserOwnedEntity
+    public class ApplicationUser : IdentityUser
     {
+        public DateTime CreateDate { get; set; }
+        public DateTime UpdateDate { get; set; }
+        public bool Deleted { get; set; }
         public string Name { get; set; }
     }
 }
