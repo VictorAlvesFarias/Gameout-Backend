@@ -1,15 +1,12 @@
-﻿using Domain.Entitites;
-using Domain.Entitites.ApplicationContextDb;
+﻿using Domain.Entitites.ApplicationContextDb;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using Web.Api.Toolkit.Identity.Domain.Entities;
 
 namespace Infrastructure.Context
 {
-    public class ApplicationDbContext : IdentityDbContext<BaseEntityIdentity>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public readonly IHttpContextAccessor _contextAccessor;
 
@@ -97,35 +94,6 @@ namespace Infrastructure.Context
                       .IsRequired();
 
             });
-        }
-
-        public string GetUserId()
-        {
-            var httpContext = _contextAccessor.HttpContext;
-
-            if (httpContext is null)
-            {
-                return null;
-            }
-
-            var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!string.IsNullOrEmpty(userId))
-            {
-                return userId;
-            }
-
-            if (httpContext.Request.Cookies.TryGetValue("id", out userId))
-            {
-                return userId;
-            }
-
-            if (httpContext.Request.Headers.TryGetValue("id", out var headerValue))
-            {
-                return headerValue.ToString();
-            }
-
-            return null;
         }
     }
 }

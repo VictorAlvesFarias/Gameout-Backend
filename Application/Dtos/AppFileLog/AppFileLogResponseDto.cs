@@ -1,5 +1,3 @@
-using Domain.Entitites.Shared;
-
 namespace Application.Dtos.AppFileLog
 {
     public class AppFileLogResponseDto

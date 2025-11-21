@@ -1,4 +1,4 @@
-namespace Domain.Entitites.Shared
+namespace Application.Types
 {
     public enum AppFileActionType
     {

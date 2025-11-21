@@ -1,6 +1,4 @@
-﻿using Web.Api.Toolkit.Identity.Domain.Entities;
-
-namespace Domain.Entitites.ApplicationContextDb
+﻿namespace Domain.Entitites.ApplicationContextDb
 {
     public class AppFile : BaseUserOwnedEntity
     {

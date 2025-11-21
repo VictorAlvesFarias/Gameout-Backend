@@ -1,12 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Net.WebSockets;
 using Web.Api.Toolkit.Ws.Application.Dtos;
 using Web.Api.Toolkit.Ws.Application.Workers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Workers
 {

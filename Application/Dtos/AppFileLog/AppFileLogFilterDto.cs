@@ -1,4 +1,4 @@
-using Domain.Entitites.Shared;
+using Application.Types;
 
 namespace Application.Dtos.AppFileLog
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Web.Api.Toolkit.Ws.Application.Dtos;
 using Web.Api.Toolkit.Ws.Application.Workers;
-using System.Security.Claims;
 
 namespace ASP.NET_Core_Template.Controllers
 {
@@ -18,15 +18,11 @@ namespace ASP.NET_Core_Template.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Obtém informações de conexão WebSocket (URL + token)
-        /// </summary>
         [HttpPost("connect")]
         public IActionResult GetConnectionInfo()
         {
             try
             {
-                // Obter userId do usuário autenticado ou de cookies
                 var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Request.Cookies["id"] ?? Guid.NewGuid().ToString();
 
                 if (!Guid.TryParse(userId, out var guid))

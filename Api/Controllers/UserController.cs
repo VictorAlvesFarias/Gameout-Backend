@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Application.Services.Identity;
+using Application.Services.IdentityService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web.Api.Toolkit.Helpers.Application.Dtos;
-using Web.Api.Toolkit.Identity.Application.Services;
 using Web.Api.Toolkit.Helpers.Api.Extensions;
+using Web.Api.Toolkit.Helpers.Application.Dtos;
 using Web.Api.Toolkit.Identity.Application.Dtos;
-using Application.Services.Identity;
 
 namespace ASP.NET_Core_Template.Controllers
 {
@@ -41,6 +41,15 @@ namespace ASP.NET_Core_Template.Controllers
             var result = await _identityService.DeleteSignedUser(loginData);
 
             return this.DefaultResult(result);
+        }
+
+        [Authorize]
+        [HttpGet("/get-current-user")]
+        public async Task<ActionResult<BaseResponse<Application.Dtos.User.GetUserResponseDto>>> GetCurrentUser()
+        {
+            var result = await _identityService.GetCurrentUserAsync();
+
+            return this.Result(result);
         }
 
         [Authorize]

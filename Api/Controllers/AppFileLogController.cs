@@ -1,5 +1,6 @@
 using Application.Dtos.AppFileLog;
 using Application.Services.AppFileLogService;
+using Application.Types;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,7 +48,7 @@ namespace ASP.NET_Core_Template.Controllers
                 AppFileId = appFileId,
                 AppStoredFileId = appStoredFileId,
                 StoredFileId = storedFileId,
-                ActionType = actionType.HasValue ? (Domain.Entitites.Shared.AppFileActionType?)actionType.Value : null,
+                ActionType = actionType.HasValue ? (AppFileActionType?)actionType.Value : null,
                 StartDate = startDate,
                 EndDate = endDate,
                 UserId = userId,

@@ -1,7 +1,7 @@
 ﻿using Application.Dtos.AppFile;
 using Application.Services.AppFileLogService;
+using Application.Types;
 using Domain.Entitites.ApplicationContextDb;
-using Domain.Entitites.Shared;
 using Domain.Queues.AppFileDtos;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -184,7 +184,7 @@ namespace Application.Services.AppFileService
                 e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
                 e.Value.Headers.Any(e => e.Value == "drive" && e.Key == "type")
             ).Value;
-            
+
             if (clientDriver is not null)
             {
                 _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
@@ -307,7 +307,7 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e => 
+            var clientDriver = _webSocketWorker.GetClients().FirstOrDefault(e =>
                 e.Value.Headers.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
                 e.Value.Headers.Any(e => e.Value == "drive" && e.Key == "type")
             ).Value;
@@ -826,7 +826,7 @@ namespace Application.Services.AppFileService
             }
 
             var clients = _webSocketWorker.GetClients();
-                
+
             var clientDriver = clients.FirstOrDefault(e =>
                 e.Value.Headers.Any(e => e.Value.Equals(appFile.UserId) && e.Key.Equals("id")) &&
                 e.Value.Headers.Any(e => e.Value.Equals("drive") && e.Key.Equals("type"))

@@ -1,9 +1,8 @@
 using Application.Dtos.AppFileLog;
+using Application.Types;
 using Domain.Entitites.ApplicationContextDb;
-using Domain.Entitites.Shared;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
-using Web.Api.Toolkit.Entity.Infraestructure;
 using Web.Api.Toolkit.Entity.Infraestructure.Repositories;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
 
@@ -48,13 +47,6 @@ namespace Application.Services.AppFileLogService
                     CreateDate = DateTime.Now,
                     UpdateDate = DateTime.Now
                 };
-
-                // Definir o usuário atual se disponível
-                var userId = _context.GetUserId();
-                if (!string.IsNullOrEmpty(userId))
-                {
-                    log.UserId = userId;
-                }
 
                 await _appFileLogRepository.AddAsync(log);
             }

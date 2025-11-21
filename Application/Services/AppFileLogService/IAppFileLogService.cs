@@ -1,5 +1,5 @@
 using Application.Dtos.AppFileLog;
-using Domain.Entitites.Shared;
+using Application.Types;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
 
 namespace Application.Services.AppFileLogService

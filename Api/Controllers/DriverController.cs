@@ -1,11 +1,9 @@
-﻿using Application.Dtos.AppFile;
-using Application.Services.AppFileService;
-using Domain.Entitites.ApplicationContextDb;
+﻿using Application.Services.AppFileService;
+using Domain.Queues.AppFileDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web.Api.Toolkit.Helpers.Application.Dtos;
 using Web.Api.Toolkit.Helpers.Api.Extensions;
-using Domain.Queues.AppFileDtos;
+using Web.Api.Toolkit.Helpers.Application.Dtos;
 
 
 namespace ASP.NET_Core_Template.Controllers
@@ -24,7 +22,7 @@ namespace ASP.NET_Core_Template.Controllers
 
         [Authorize]
         [HttpPost("stream-file")]
-        public ActionResult<DefaultResponse> UploadFile(int appStoredFileId,int originalFileSize,IFormFile file)
+        public ActionResult<DefaultResponse> UploadFile(int appStoredFileId, int originalFileSize, IFormFile file)
         {
             using var memoryStream = new MemoryStream();
             file.CopyTo(memoryStream);

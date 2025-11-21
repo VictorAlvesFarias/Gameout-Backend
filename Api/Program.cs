@@ -24,6 +24,8 @@ builder.Services.RegisterServices(builder.Configuration);
 builder.Services.AddDbContext<ApplicationDbContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+
 builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddCors(options =>
 {
@@ -31,7 +33,8 @@ builder.Services.AddCors(options =>
     builder => builder
         .AllowAnyOrigin()
         .AllowAnyMethod()
-        .AllowAnyHeader());
+        .AllowAnyHeader()
+    );
 });
 
 var app = builder.Build();

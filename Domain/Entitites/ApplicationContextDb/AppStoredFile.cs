@@ -1,6 +1,4 @@
-﻿using Identity.Domain.Entities;
-
-namespace Domain.Entitites.ApplicationContextDb
+﻿namespace Domain.Entitites.ApplicationContextDb
 {
     public class AppStoredFile : BaseUserOwnedEntity
     {
