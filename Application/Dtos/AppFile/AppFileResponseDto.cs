@@ -12,5 +12,8 @@ namespace Application.Dtos.AppFile
         public bool Synced { get; set; }
         public string UserId { get; set; }
         public bool AutoValidateSync { get; set; }
+        public int Status { get; set; }
+        public string StatusDetails { get; set; }
+        public string StatusMessage { get; set; }
     }
 }

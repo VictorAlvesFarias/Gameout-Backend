@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20251121032712_12313213-123opk12asdasd")]
+    partial class _12313213123opk12asdasd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.36");
@@ -55,6 +57,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("StatusMessage")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Synced")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("TEXT");
@@ -122,52 +127,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AppFileLogs", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.ApplicationLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("TraceId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TraceId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ApplicationLogs", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.ApplicationUser", b =>
@@ -262,6 +221,17 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Error")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Processing")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
@@ -297,43 +267,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AppStoredFiles", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.ContextTrace", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("EntityId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("EntityName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("TraceId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("UpdateDate")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TraceId");
-
-                    b.HasIndex("EntityName", "EntityId");
-
-                    b.ToTable("ContextTraces", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.StoredFile", b =>
@@ -375,40 +308,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("StoredFile");
-                });
-
-            modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.Trace", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Traces", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.UserApiKey", b =>
@@ -604,25 +503,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.ApplicationLog", b =>
-                {
-                    b.HasOne("Domain.Entitites.ApplicationContextDb.Trace", "Trace")
-                        .WithMany("Logs")
-                        .HasForeignKey("TraceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entitites.ApplicationContextDb.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Trace");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.AppStoredFile", b =>
                 {
                     b.HasOne("Domain.Entitites.ApplicationContextDb.AppFile", "AppFile")
@@ -649,29 +529,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.ContextTrace", b =>
-                {
-                    b.HasOne("Domain.Entitites.ApplicationContextDb.Trace", "Trace")
-                        .WithMany("ContextTraces")
-                        .HasForeignKey("TraceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Trace");
-                });
-
             modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.StoredFile", b =>
-                {
-                    b.HasOne("Domain.Entitites.ApplicationContextDb.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.Trace", b =>
                 {
                     b.HasOne("Domain.Entitites.ApplicationContextDb.ApplicationUser", "User")
                         .WithMany()
@@ -742,13 +600,6 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Entitites.ApplicationContextDb.Trace", b =>
-                {
-                    b.Navigation("ContextTraces");
-
-                    b.Navigation("Logs");
                 });
 #pragma warning restore 612, 618
         }

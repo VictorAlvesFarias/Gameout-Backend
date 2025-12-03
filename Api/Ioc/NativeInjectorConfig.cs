@@ -1,4 +1,6 @@
-﻿using Application.Services.AppFileLogService;
+﻿using Application.Configuration;
+using Application.Services.ApiKeyService;
+using Application.Services.ApplicationLogService;
 using Application.Services.AppFileService;
 using Application.Services.Identity;
 using Application.Services.IdentityService;
@@ -30,8 +32,12 @@ namespace ASP.NET_Core_Template.Ioc
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped(typeof(IDatabaseContextMediator<>), typeof(DatabaseContextMediator<>));
             services.AddScoped<IAppFileService, AppFileService>();
-            services.AddScoped<IAppFileLogService, AppFileLogService>();
+            services.AddScoped<IApplicationLogService, ApplicationLogService>();
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IApiKeyService, ApiKeyService>();
+
+            // Configure DriverApiKeyOptions
+            services.Configure<DriverApiKeyOptions>(configuration.GetSection(DriverApiKeyOptions.SectionName));
         }
     }
 }

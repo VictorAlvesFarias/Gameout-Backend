@@ -7,17 +7,21 @@
         public bool VersionControl { get; set; }
         public bool Observer { get; set; }
         public bool AutoValidateSync { get; set; }
-        public bool Synced { get; set; }
+        public int Status { get; set; }
+        public string StatusDetails { get; set; }
+        public string StatusMessage { get; set; }
 
-        public void Update(string? name = null, string? path = null, bool? versionControl = null, bool? observer = null, bool? autoValidateSync = null, bool? synced = null)
+        public void Update(string? name = null, string? path = null, bool? versionControl = null, bool? observer = null, bool? autoValidateSync = null, int? status = null, string? statusDetails = null, string? statusMessage = null)
         {
             Name = name ?? Name;
             Path = path ?? Path;
             VersionControl = versionControl ?? VersionControl;
             Observer = observer ?? Observer;
             UpdateDate = DateTime.Now;
-            Synced = synced ?? Synced;
             AutoValidateSync = autoValidateSync ?? AutoValidateSync;
+            Status = status ?? Status;
+            StatusDetails = statusDetails ?? StatusDetails;
+            StatusMessage = statusMessage ?? StatusMessage;
         }
     }
 }

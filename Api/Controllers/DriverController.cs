@@ -1,13 +1,16 @@
-﻿using Application.Services.AppFileService;
+﻿using Application.Dtos.AppFile;
+using Application.Services.AppFileService;
+using ASP.NET_Core_Template.Attributes;
 using Domain.Queues.AppFileDtos;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Web.Api.Toolkit.Helpers.Api.Extensions;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
 
 
 namespace ASP.NET_Core_Template.Controllers
 {
+    [ApiController]
     public class DriverController : ControllerBase
     {
         public readonly IAppFileService _appFileService;
@@ -20,48 +23,35 @@ namespace ASP.NET_Core_Template.Controllers
             _appFileService = appFileService;
         }
 
-        [Authorize]
+        [ApiKeyAuthorize]
         [HttpPost("stream-file")]
-        public ActionResult<DefaultResponse> UploadFile(int appStoredFileId, int originalFileSize, IFormFile file)
+        public async Task<ActionResult<DefaultResponse>> UploadFile([FromForm] AppFileStreamFileRequestDto req)
         {
-            using var memoryStream = new MemoryStream();
-            file.CopyTo(memoryStream);
-
-            var result = _appFileService.SingleSync(new AppFileUpdateResponseMessag
-            {
-                AppStoredFileId = appStoredFileId,
-                UncompressedSize = originalFileSize,
-                MemoryStream = memoryStream.ToArray()
-            });
-
+            var result = await _appFileService.SingleSync(req);
             return this.DefaultResult(result);
         }
 
-        [HttpPost("upload-error")]
-        public ActionResult<DefaultResponse> UploadError([FromBody] AppFileErrorMessage req)
-        {
-            var result = _appFileService.ProcessError(req);
-            return this.DefaultResult(result);
-        }
-
+        [ApiKeyAuthorize]
         [HttpPost("request-sync")]
-        public ActionResult<DefaultResponse> RequestSync([FromBody] AppFileSyncRequestMessage req)
+        public async Task<ActionResult<DefaultResponse>> RequestSync([FromBody] AppFileSyncRequestDto req)
         {
-            var result = _appFileService.RequestSync(req.AppFileId);
+            var result = await _appFileService.RequestSync(req);
             return this.DefaultResult(result);
         }
 
-        [HttpPost("status")]
-        public ActionResult<DefaultResponse> Status([FromBody] AppFileStatusCheckResponseMessage req)
+        [ApiKeyAuthorize]
+        [HttpPut("update-appfile-status")]
+        public async Task<ActionResult<DefaultResponse>> UpdateAppFileStatus([FromBody] UpdateAppFileStatusRequestDto request)
         {
-            var result = _appFileService.ProcessStatusResponse(req);
+            var result = await _appFileService.SetAppFileStatus(request.AppFileId, request.Status, request.StatusMessage, request.StatusDetails);
             return this.DefaultResult(result);
         }
 
-        [HttpPost("validate")]
-        public ActionResult<DefaultResponse> Validate([FromBody] AppFileValidateStatusResponse req)
+        [ApiKeyAuthorize]
+        [HttpPut("update-appstoredfile-status")]
+        public async Task<ActionResult<DefaultResponse>> UpdateAppStoredFileStatus([FromBody] UpdateAppStoredFileStatusRequestDto request)
         {
-            var result = _appFileService.StatusUpdate(req);
+            var result = await _appFileService.SetAppStoredFileStatus(request.AppStoredFileId, request.Status, request.StatusMessage, request.StatusDetails);
             return this.DefaultResult(result);
         }
     }

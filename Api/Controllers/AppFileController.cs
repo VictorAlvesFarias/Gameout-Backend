@@ -1,6 +1,8 @@
 ﻿using Application.Dtos.AppFile;
 using Application.Services.AppFileService;
+using ASP.NET_Core_Template.Attributes;
 using Domain.Entitites.ApplicationContextDb;
+using Domain.Queues.AppFileDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Api.Toolkit.Helpers.Api.Extensions;
@@ -10,7 +12,6 @@ namespace ASP.NET_Core_Template.Controllers
 {
     public class AppFileController : Controller
     {
-
         public readonly IAppFileService _appFileService;
         private readonly Controller _controller;
 
@@ -25,33 +26,33 @@ namespace ASP.NET_Core_Template.Controllers
 
         [Authorize]
         [HttpPost("upload-file")]
-        public ActionResult<BaseResponse<AppFile>> UploadFile([FromBody] AppFile file)
+        public async Task<ActionResult<BaseResponse<AppFileResponseDto>>> UploadFile([FromBody] AppFileRequestDto request)
         {
-            var result = _appFileService.InsertFile(file);
+            var result = await _appFileService.InsertFile(request);
             return this.Result(result);
         }
 
         [Authorize]
         [HttpPut("update-file")]
-        public ActionResult<BaseResponse<AppFile>> UpdateFile([FromBody] AppFile file, int id)
+        public async Task<ActionResult<BaseResponse<AppFileResponseDto>>> UpdateFile([FromBody] AppFileRequestDto request, int id)
         {
-            var result = _appFileService.UpdateFile(file, id);
+            var result = await _appFileService.UpdateFile(request, id);
             return this.Result(result);
         }
 
         [Authorize]
         [HttpDelete("delete-file")]
-        public ActionResult<DefaultResponse> DeleteFile(int id)
+        public async Task<ActionResult<DefaultResponse>> DeleteFile(int id)
         {
-            var result = _appFileService.DeleteFile(id);
+            var result = await _appFileService.DeleteFile(id);
             return this.DefaultResult(result);
         }
 
         [Authorize]
         [HttpDelete("delete-stored-file")]
-        public ActionResult<DefaultResponse> DeleteStoredFile(int id)
+        public async Task<ActionResult<DefaultResponse>> DeleteStoredFile(int id)
         {
-            var result = _appFileService.DeleteStoredFile(id);
+            var result = await _appFileService.DeleteStoredFile(id);
             return this.DefaultResult(result);
         }
 
@@ -67,56 +68,40 @@ namespace ASP.NET_Core_Template.Controllers
         [HttpGet("get-stored-files")]
         public ActionResult<BaseResponse<List<AppStoredFileResponseDto>>> GetStoredFiles(int? idAppFile = null, bool? processing = false)
         {
-            var result = _appFileService.GetAppStoredFiles(idAppFile, processing);
+            var result = _appFileService.GetAppStoredFiles(idAppFile:idAppFile, processing:processing);
             return this.Result(result);
         }
 
         [Authorize]
         [HttpPost("single-sync")]
-        public ActionResult<DefaultResponse> SingleSync(int idAppFile)
+        public async Task<ActionResult<DefaultResponse>> SingleSync(AppFileSyncRequestDto req)
         {
-            var result = _appFileService.RequestSync(idAppFile);
+            var result = await _appFileService.RequestSync(req);
             return this.DefaultResult(result);
         }
 
         [Authorize]
         [HttpPost("reprocess-file")]
-        public ActionResult<DefaultResponse> ReprocessFile(int appStoredFileId)
+        public async Task<ActionResult<DefaultResponse>> ReprocessFile(int appStoredFileId)
         {
-            var result = _appFileService.ReprocessFile(appStoredFileId);
-            return this.DefaultResult(result);
-        }
-
-        [Authorize]
-        [HttpDelete("delete-file-with-error")]
-        public ActionResult<DefaultResponse> DeleteFileWithError(int appStoredFileId)
-        {
-            var result = _appFileService.DeleteFileWithError(appStoredFileId);
-            return this.DefaultResult(result);
-        }
-
-        [Authorize]
-        [HttpGet("check-processing-status")]
-        public ActionResult<DefaultResponse> CheckProcessingStatus(int appStoredFileId)
-        {
-            var result = _appFileService.CheckProcessingStatus(appStoredFileId);
-            return this.DefaultResult(result);
-        }
-
-        [Authorize]
-        [HttpGet("validate-status")]
-        public ActionResult<DefaultResponse> ValidateStatus(int appFileId)
-        {
-            var result = _appFileService.RequestStatusUpdate(appFileId);
+            var result = await _appFileService.ReprocessFile(appStoredFileId);
             return this.DefaultResult(result);
         }
 
         [Authorize]
         [HttpGet("download-file")]
-        public IActionResult DownloadFile(int id)
+        public async Task<IActionResult> DownloadFile(int id)
         {
-            var result = _appFileService.DownloadFile(id);
+            var result = await _appFileService.DownloadFile(id);
             return this.FileResult(result);
+        }
+
+        [Authorize]
+        [HttpPost("check-stored-file-status")]
+        public async Task<ActionResult<DefaultResponse>> CheckAppStoredFileStatus([FromBody] CheckAppStoredFileStatusRequestDto request)
+        {
+            var result = await _appFileService.CheckAppStoredFileStatus(request);
+            return this.DefaultResult(result);
         }
     }
 }

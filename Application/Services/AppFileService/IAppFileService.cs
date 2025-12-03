@@ -1,4 +1,5 @@
 ﻿using Application.Dtos.AppFile;
+using Application.Types;
 using Domain.Entitites.ApplicationContextDb;
 using Domain.Queues.AppFileDtos;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
@@ -9,19 +10,16 @@ namespace Application.Services.AppFileService
     {
         BaseResponse<List<AppFileResponseDto>> GetFiles();
         BaseResponse<List<AppStoredFileResponseDto>> GetAppStoredFiles(int? idAppFile = null, bool? processing = false);
-        BaseResponse<AppFile> InsertFile(AppFile req);
-        BaseResponse<AppFile> UpdateFile(AppFile req, int id);
-        BaseResponse<StoredFile> DownloadFile(int id);
-        DefaultResponse RequestSync(int idAppFile);
-        DefaultResponse ReprocessFile(int appStoredFileId);
-        DefaultResponse CheckProcessingStatus(int appStoredFileId);
-        DefaultResponse DeleteFileWithError(int appStoredFileId);
-        DefaultResponse DeleteFile(int id);
-        DefaultResponse DeleteStoredFile(int id);
-        DefaultResponse RequestStatusUpdate(int appStoredFileId);
-        DefaultResponse SingleSync(AppFileUpdateResponseMessag req);
-        DefaultResponse ProcessError(AppFileErrorMessage errorMessage);
-        DefaultResponse ProcessStatusResponse(AppFileStatusCheckResponseMessage statusResponse);
-        DefaultResponse StatusUpdate(AppFileValidateStatusResponse req);
+        Task<BaseResponse<AppFileResponseDto>> InsertFile(AppFileRequestDto req);
+        Task<BaseResponse<AppFileResponseDto>> UpdateFile(AppFileRequestDto req, int id);
+        Task<BaseResponse<StoredFile>> DownloadFile(int id);
+        Task<DefaultResponse> RequestSync(AppFileSyncRequestDto req);
+        Task<DefaultResponse> ReprocessFile(int appStoredFileId);
+        Task<DefaultResponse> DeleteFile(int id);
+        Task<DefaultResponse> DeleteStoredFile(int id);
+        Task<DefaultResponse> SingleSync(AppFileStreamFileRequestDto req);
+        Task<DefaultResponse> SetAppFileStatus(int appFileId, AppFileStatusTypes status, string statusMessage = null, string statusDetails = null);
+        Task<DefaultResponse> SetAppStoredFileStatus(int appStoredFileId, AppStoredFileStatusTypes status, string statusMessage = null, string statusDetails = null);
+        Task<DefaultResponse> CheckAppStoredFileStatus(CheckAppStoredFileStatusRequestDto request);
     }
 }

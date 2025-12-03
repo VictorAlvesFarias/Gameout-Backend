@@ -1,6 +1,6 @@
 namespace Application.Types
 {
-    public enum AppFileActionType
+    public enum LogStatusTypes
     {
         InsertFile,
         UpdateFile,

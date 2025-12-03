@@ -8,7 +8,6 @@ namespace Application.Dtos.AppFile
         public int AppFileId { get; set; }
         public int? StoredFileId { get; set; }
         public bool Versioned { get; set; }
-        public bool Processing { get; set; }
         public string Error { get; set; }
         public string Message { get; set; }
         public bool Erro { get; set; }
@@ -16,5 +15,8 @@ namespace Application.Dtos.AppFile
         public DateTime UpdateDate { get; set; }
         public double? SizeInBytes { get; set; }
         public string UserId { get; set; }
+        public int Status { get; set; }
+        public string StatusDetails { get; set; }
+        public string StatusMessage { get; set; }
     }
 }

@@ -7,19 +7,19 @@
         public int? StoredFileId { get; set; }
         public StoredFile? StoredFile { get; set; }
         public bool Versioned { get; set; }
-        public bool Processing { get; set; }
-        public string Error { get; set; }
-        public string Message { get; set; }
+        public int Status { get; set; }
+        public string StatusDetails { get; set; }
+        public string StatusMessage { get; set; }
 
-        public void Update(int? appFileId = null, int? storedFileId = null, bool? versioned = null, bool? processing = null, string error = null, string mensagem = null)
+        public void Update(int? appFileId = null, int? storedFileId = null, bool? versioned = null, int? status = null, string? statusDetails = null, string? statusMessage = null)
         {
             AppFileId = appFileId ?? AppFileId;
             StoredFileId = storedFileId ?? StoredFileId;
             Versioned = versioned ?? Versioned;
-            Processing = processing ?? Processing;
             UpdateDate = DateTime.Now;
-            Error = error ?? Error;
-            Message = mensagem ?? Message;
+            Status = status ?? Status;
+            StatusDetails = statusDetails ?? StatusDetails;
+            StatusMessage = statusMessage ?? StatusMessage;
         }
     }
 }

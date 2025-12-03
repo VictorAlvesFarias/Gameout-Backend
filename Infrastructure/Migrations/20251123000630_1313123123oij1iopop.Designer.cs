@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20251123000630_1313123123oij1iopop")]
+    partial class _1313123123oij1iopop
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.36");
@@ -55,6 +57,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("StatusMessage")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Synced")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("TEXT");
@@ -260,6 +265,17 @@ namespace Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Deleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Processing")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Status")
