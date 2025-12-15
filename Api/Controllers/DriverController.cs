@@ -26,6 +26,15 @@ namespace ASP.NET_Core_Template.Controllers
 
         [Traced]
         [ApiKeyAuthorize]
+        [HttpGet("get-trace-id")]
+        public async Task<ActionResult<BaseResponse<int>>> GetTraceId()
+        {
+            var traceId = await _appFileService.CreateTraceId();
+            return this.Result(traceId);
+        }
+
+        [Traced]
+        [ApiKeyAuthorize]
         [HttpPost("stream-file")]
         public async Task<ActionResult<DefaultResponse>> UploadFile([FromForm] AppFileStreamFileRequestDto req)
         {
@@ -33,6 +42,7 @@ namespace ASP.NET_Core_Template.Controllers
             return this.DefaultResult(result);
         }
         
+        [Traced]
         [ApiKeyAuthorize]
         [HttpPost("request-sync")]
         public async Task<ActionResult<DefaultResponse>> RequestSync([FromBody] AppFileSyncRequestDto req)

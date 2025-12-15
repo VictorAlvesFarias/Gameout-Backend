@@ -8,6 +8,7 @@ namespace Application.Services.AppFileService
 {
     public interface IAppFileService
     {
+        Task<BaseResponse<int>> CreateTraceId();
         BaseResponse<List<AppFileResponseDto>> GetFiles();
         BaseResponse<List<AppStoredFileResponseDto>> GetAppStoredFiles(int? idAppFile = null, bool? processing = false);
         Task<BaseResponse<AppFileResponseDto>> InsertFile(AppFileRequestDto req);

@@ -27,7 +27,7 @@ namespace ASP.NET_Core_Template.Controllers
             return this.Result(result);
         }
 
-        [Traced]
+        [Traced(OnCreate = true)]
         [HttpPost("add")]
         public async Task<ActionResult<BaseResponse<ApplicationLogResponseDto>>> AddLog([FromBody] ApplicationLogRequestDto request)
         {

@@ -43,6 +43,16 @@ namespace Application.Services.AppFileService
             _applicationLogService = applicationLogService;
         }
 
+        public async Task<BaseResponse<int>> CreateTraceId()
+        {
+            var traceId = await _applicationLogService.GetTraceId();
+            var response = new BaseResponse<int>(true)
+            {
+                Data = traceId
+            };
+            return response;
+        }
+
         public async Task<BaseResponse<AppFileResponseDto>> InsertFile(AppFileRequestDto req)
         {
             var traceId = await _applicationLogService.GetTraceId();

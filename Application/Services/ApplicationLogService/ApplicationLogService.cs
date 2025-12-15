@@ -34,11 +34,24 @@ namespace Application.Services.ApplicationLogService
         {
             var httpContext = _httpContextAccessor.HttpContext;
 
-            if (httpContext != null && httpContext.Request.Headers.TryGetValue("X-Trace-Application-Id", out var traceIdValue))
+            if (httpContext != null)
             {
-                if (int.TryParse(traceIdValue.ToString(), out var traceId))
+                // Primeiro verifica se o trace id foi colocado nos Items pelo TracedAttribute
+                if (httpContext.Items.TryGetValue("X-Trace-Application-Id", out var itemValue) && itemValue != null)
                 {
-                    return traceId;
+                    if (int.TryParse(itemValue.ToString(), out var itemTraceId))
+                    {
+                        return itemTraceId;
+                    }
+                }
+
+                // Depois verifica no header
+                if (httpContext.Request.Headers.TryGetValue("X-Trace-Application-Id", out var traceIdValue))
+                {
+                    if (int.TryParse(traceIdValue.ToString(), out var traceId))
+                    {
+                        return traceId;
+                    }
                 }
             }
 
