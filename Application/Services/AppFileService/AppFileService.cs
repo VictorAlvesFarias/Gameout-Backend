@@ -250,7 +250,7 @@ namespace Application.Services.AppFileService
                             CreateDate = e.StoredFile.CreateDate,
                             UpdateDate = e.StoredFile.UpdateDate,
                             SizeInBytes = e.StoredFile.SizeInBytes,
-                            Base64 = null
+                            Bytes = null
                         },
                         AppFileId = e.AppFileId,
                         CreateDate = e.CreateDate,
@@ -362,8 +362,7 @@ namespace Application.Services.AppFileService
                     Body = new AppFileUpdateRequestMessage()
                     {
                         AppStoredFileId = appStoredFileAddResult.Id,
-                        Path = appFile.Path,
-                        TraceId = traceId
+                        Path = appFile.Path
                     }
                 });
             }
@@ -437,7 +436,7 @@ namespace Application.Services.AppFileService
 
             var storedFile = new StoredFile()
             {
-                Base64 = memoryStream.ToArray(),
+                Bytes = memoryStream.ToArray(),
                 Name = appStoredFile.AppFile.Name,
                 MimeType = "application/zip",
                 SizeInBytes = req.OriginalFileSize
@@ -639,7 +638,6 @@ namespace Application.Services.AppFileService
                     {
                         AppStoredFileId = appStoredFileId,
                         Path = appStoredFile.AppFile.Path,
-                        TraceId = traceId > 0 ? traceId : null
                     }
                 });
 
@@ -719,7 +717,7 @@ namespace Application.Services.AppFileService
             await _applicationLogService.AddContextTraceAsync(traceId, "AppStoredFile", appStoredFileId.ToString());
 
             var appStoredFile = _appStoredFileRepository.Get().FirstOrDefault(e => e.Id == appStoredFileId);
-            var response = new DefaultResponse(_appStoredFileRepository != null);
+            var response = new DefaultResponse(appStoredFile != null);
 
             if (!response.Success)
             {
@@ -807,14 +805,18 @@ namespace Application.Services.AppFileService
 
             if (clientDriver is not null)
             {
+                var headers = new Dictionary<string, string>();
+
+                headers.Add("X-Trace-Application-Id", traceId.ToString());
+
                 _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
                 {
                     Event = "CheckStatus",
+                    Headers = headers,
                     Body = new AppFileStatusCheckRequestMessage()
                     {
                         AppStoredFileId = request.AppStoredFileId,
-                        Path = appStoredFile.AppFile.Path,
-                        TraceId = traceId
+                        Path = appStoredFile.AppFile.Path
                     }
                 });
 

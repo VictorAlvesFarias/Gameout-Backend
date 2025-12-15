@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Application.Types
+namespace Application.Attributes.Attributes
 {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class EnumMetaAttribute : Attribute

@@ -11,12 +11,12 @@ namespace Application.Workers
         {
         }
 
-        public override WebSocketAuthResponse Authentication(WebSocket ws, Dictionary<string, string> headers, Dictionary<string, string> cookies)
+        protected override WebSocketAuthResponse Authentication(WebSocket ws, Dictionary<string, string> headers, Dictionary<string, string> cookies)
         {
             return base.Authentication(ws, headers, cookies);
         }
 
-        public override ValidateInviteTokenResult ValidateInviteToken(string token)
+        protected override ValidateInviteTokenResult ValidateInviteToken(string token)
         {
             return base.ValidateInviteToken(token);
         }

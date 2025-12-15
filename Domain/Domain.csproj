@@ -13,8 +13,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Web.Api.Toolkit.Entity.Domain" Version="1.0.11" />
-    <PackageReference Include="Web.Api.Toolkit.Helpers.Domain" Version="1.0.11" />
+    <PackageReference Include="Web.Api.Toolkit.Entity.Domain" Version="1.0.25" />
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Domain" Version="1.0.25" />
   </ItemGroup>
 
 </Project>

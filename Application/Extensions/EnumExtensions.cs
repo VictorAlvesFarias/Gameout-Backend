@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using Application.Types;
+using Application.Attributes.Attributes;
 
 namespace Application.Extensions
 {

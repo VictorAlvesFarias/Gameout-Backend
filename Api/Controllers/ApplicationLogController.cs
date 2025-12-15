@@ -1,3 +1,4 @@
+using Application.Attributes.Trace;
 using Application.Dtos.ApplicationLog;
 using Application.Services.ApplicationLogService;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +24,14 @@ namespace ASP.NET_Core_Template.Controllers
         public ActionResult<BaseResponse<List<ApplicationLogResponseDto>>> GetAllLogs()
         {
             var result = _applicationLogService.GetAllLogs();
+            return this.Result(result);
+        }
+
+        [Traced]
+        [HttpPost("add")]
+        public async Task<ActionResult<BaseResponse<ApplicationLogResponseDto>>> AddLog([FromBody] ApplicationLogRequestDto request)
+        {
+            var result = await _applicationLogService.AddLog(request);
             return this.Result(result);
         }
     }

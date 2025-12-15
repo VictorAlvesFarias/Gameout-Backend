@@ -2,6 +2,7 @@ using Application.Dtos.ApplicationLog;
 using Application.Types;
 using Domain.Entitites.ApplicationContextDb;
 using Infrastructure.Context;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Web.Api.Toolkit.Entity.Infraestructure.Repositories;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
@@ -13,23 +14,34 @@ namespace Application.Services.ApplicationLogService
         private readonly IBaseRepository<Trace> _traceRepository;
         private readonly IBaseRepository<ApplicationLog> _applicationLogRepository;
         private readonly IBaseRepository<ContextTrace> _contextTraceRepository;
-        private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ApplicationLogService(
             IBaseRepository<Trace> traceRepository,
             IBaseRepository<ApplicationLog> applicationLogRepository,
             IBaseRepository<ContextTrace> contextTraceRepository,
-            ApplicationDbContext context
+            ApplicationDbContext context,
+            IHttpContextAccessor httpContextAccessor
         )
         {
             _traceRepository = traceRepository;
             _applicationLogRepository = applicationLogRepository;
             _contextTraceRepository = contextTraceRepository;
-            _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<int> GetTraceId()
         {
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext != null && httpContext.Request.Headers.TryGetValue("X-Trace-Application-Id", out var traceIdValue))
+            {
+                if (int.TryParse(traceIdValue.ToString(), out var traceId))
+                {
+                    return traceId;
+                }
+            }
+
             var trace = new Trace();
             var result = await _traceRepository.AddAsync(trace);
 
@@ -149,6 +161,42 @@ namespace Application.Services.ApplicationLogService
             var response = new BaseResponse<List<ApplicationLogResponseDto>>(true)
             {
                 Data = traces
+            };
+
+            return response;
+        }
+
+        public async Task<BaseResponse<ApplicationLogResponseDto>> AddLog(ApplicationLogRequestDto request)
+        {
+            var traceId = await GetTraceId();
+
+            var log = new ApplicationLog
+            {
+                TraceId = traceId,
+                Message = request.Message,
+                Type = request.Type,
+                Action = request.Action,
+                CreateDate = DateTime.Now,
+                UpdateDate = DateTime.Now
+            };
+
+            var result = await _applicationLogRepository.AddAsync(log);
+
+            var responseDto = new ApplicationLogResponseDto
+            {
+                Id = result.Id,
+                Message = result.Message,
+                Type = result.Type,
+                Action = result.Action,
+                TraceId = result.TraceId,
+                CreateDate = result.CreateDate,
+                UpdateDate = result.UpdateDate,
+                UserId = result.UserId
+            };
+
+            var response = new BaseResponse<ApplicationLogResponseDto>(true)
+            {
+                Data = responseDto
             };
 
             return response;

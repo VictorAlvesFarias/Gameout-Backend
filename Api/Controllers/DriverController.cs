@@ -1,4 +1,5 @@
-﻿using Application.Dtos.AppFile;
+﻿using Application.Attributes.Trace;
+using Application.Dtos.AppFile;
 using Application.Services.AppFileService;
 using ASP.NET_Core_Template.Attributes;
 using Domain.Queues.AppFileDtos;
@@ -23,6 +24,7 @@ namespace ASP.NET_Core_Template.Controllers
             _appFileService = appFileService;
         }
 
+        [Traced]
         [ApiKeyAuthorize]
         [HttpPost("stream-file")]
         public async Task<ActionResult<DefaultResponse>> UploadFile([FromForm] AppFileStreamFileRequestDto req)
@@ -30,7 +32,7 @@ namespace ASP.NET_Core_Template.Controllers
             var result = await _appFileService.SingleSync(req);
             return this.DefaultResult(result);
         }
-
+        
         [ApiKeyAuthorize]
         [HttpPost("request-sync")]
         public async Task<ActionResult<DefaultResponse>> RequestSync([FromBody] AppFileSyncRequestDto req)
@@ -39,6 +41,7 @@ namespace ASP.NET_Core_Template.Controllers
             return this.DefaultResult(result);
         }
 
+        [Traced(OnCreate = true)]
         [ApiKeyAuthorize]
         [HttpPut("update-appfile-status")]
         public async Task<ActionResult<DefaultResponse>> UpdateAppFileStatus([FromBody] UpdateAppFileStatusRequestDto request)
@@ -47,6 +50,7 @@ namespace ASP.NET_Core_Template.Controllers
             return this.DefaultResult(result);
         }
 
+        [Traced(OnCreate = true)]
         [ApiKeyAuthorize]
         [HttpPut("update-appstoredfile-status")]
         public async Task<ActionResult<DefaultResponse>> UpdateAppStoredFileStatus([FromBody] UpdateAppStoredFileStatusRequestDto request)
