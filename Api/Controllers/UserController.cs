@@ -61,6 +61,7 @@ namespace ASP.NET_Core_Template.Controllers
             return this.DefaultResult(result);
         }
 
+        [Authorize]
         [HttpPost("/validade-email")]
         public async Task<ActionResult<DefaultResponse>> ValidateEmail([FromBody] ValidateEmailRequest validate)
         {
@@ -69,6 +70,7 @@ namespace ASP.NET_Core_Template.Controllers
             return this.DefaultResult(result);
         }
 
+        [Authorize]
         [HttpPost("/validate-username")]
         public async Task<ActionResult<DefaultResponse>> ValidateUsername([FromBody] ValidateUsernameRequest validate)
         {

@@ -18,6 +18,7 @@ namespace ASP.NET_Core_Template.Controllers
             _apiKeyService = apiKeyService;
         }
 
+        [Authorize]
         [HttpPost("generate")]
         public async Task<ActionResult<BaseResponse<string>>> GenerateApiKey()
         {
@@ -25,6 +26,7 @@ namespace ASP.NET_Core_Template.Controllers
             return this.Result(result);
         }
 
+        [Authorize]
         [HttpGet("current")]
         public async Task<ActionResult<BaseResponse<string>>> GetCurrentApiKey()
         {

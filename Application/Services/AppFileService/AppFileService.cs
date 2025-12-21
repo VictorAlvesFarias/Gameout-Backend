@@ -2,6 +2,7 @@
 using Application.Extensions;
 using Application.Services.ApplicationLogService;
 using Application.Types;
+using Application.Workers;
 using Domain.Entitites.ApplicationContextDb;
 using Domain.Queues.AppFileDtos;
 using Infrastructure.Context;
@@ -13,7 +14,6 @@ using System.IO.Compression;
 using Web.Api.Toolkit.Entity.Infraestructure.Repositories;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
 using Web.Api.Toolkit.Ws.Application.Dtos;
-using Web.Api.Toolkit.Ws.Application.Workers;
 
 namespace Application.Services.AppFileService
 {
@@ -23,7 +23,7 @@ namespace Application.Services.AppFileService
         private readonly IBaseRepository<AppStoredFile> _appStoredFileRepository;
         private readonly IBaseRepository<StoredFile> _storedFileRepository;
         private readonly ApplicationContext _applicationContext;
-        private readonly WebSocketWorker _webSocketWorker;
+        private readonly AppFileWorker _webSocketWorker;
         private readonly IApplicationLogService _applicationLogService;
 
         public AppFileService(
@@ -31,7 +31,7 @@ namespace Application.Services.AppFileService
             IBaseRepository<StoredFile> storedFileRepository,
             IBaseRepository<AppStoredFile> appStoredFileRepository,
             ApplicationContext applicationContext,
-            WebSocketWorker webSocketWorker,
+            AppFileWorker webSocketWorker,
             IApplicationLogService applicationLogService
         )
         {
@@ -185,8 +185,8 @@ namespace Application.Services.AppFileService
 
             var clients = _webSocketWorker.GetClients();
             var clientDriver = clients.FirstOrDefault(e =>
-                e.Value.Headers.Any(e => e.Value.Equals(appFile.UserId) && e.Key.Equals("id")) &&
-                e.Value.Headers.Any(e => e.Value.Equals("drive") && e.Key.Equals("type"))
+                e.Value.Headers.Any(h => h.Value.Equals(appFile.UserId) && h.Key.Equals("clientId")) &&
+                e.Value.Headers.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
             ).Value;
 
             if (clientDriver is not null)
@@ -360,8 +360,8 @@ namespace Application.Services.AppFileService
 
             var clients = _webSocketWorker.GetClients();
             var clientDriver = clients.FirstOrDefault(e =>
-                e.Value.Headers.Any(e => e.Value.Equals(appFile.UserId) && e.Key.Equals("id")) &&
-                e.Value.Headers.Any(e => e.Value.Equals("drive") && e.Key.Equals("type"))
+                e.Value.Headers.Any(h => h.Value.Equals(appFile.UserId) && h.Key.Equals("clientId")) &&
+                e.Value.Headers.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
             ).Value;
 
             if (clientDriver is not null)
@@ -387,8 +387,8 @@ namespace Application.Services.AppFileService
 
             var allClients = _webSocketWorker.GetClients();
             var client = allClients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
-                e.Value.Cookies.Any(e => e.Value == "web" && e.Key == "type")
+                e.Value.Cookies.Any(c => c.Value == appFile.UserId && c.Key == "clientId") &&
+                e.Value.Cookies.Any(c => c.Value == "web" && c.Key == "type")
             ).Value;
 
             if (client is not null)
@@ -516,8 +516,8 @@ namespace Application.Services.AppFileService
 
             var allClients = _webSocketWorker.GetClients();
             var client = allClients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
-                e.Value.Cookies.Any(e => e.Value == "web" && e.Key == "type")
+                e.Value.Cookies.Any(c => c.Value == appFile.UserId && c.Key == "clientId") &&
+                e.Value.Cookies.Any(c => c.Value == "web" && c.Key == "type")
             ).Value;
 
             if (client is not null)
@@ -635,7 +635,7 @@ namespace Application.Services.AppFileService
 
             var clients = _webSocketWorker.GetClients();
             var clientDriver = clients.FirstOrDefault(e =>
-                e.Value.Headers.Any(h => h.Value.Equals(appStoredFile.AppFile.UserId) && h.Key.Equals("id")) &&
+                e.Value.Headers.Any(h => h.Value.Equals(appStoredFile.AppFile.UserId) && h.Key.Equals("clientId")) &&
                 e.Value.Headers.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
             ).Value;
 
@@ -704,8 +704,8 @@ namespace Application.Services.AppFileService
 
             var allClients = _webSocketWorker.GetClients();
             var client = allClients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(e => e.Value == appFile.UserId && e.Key == "id") &&
-                e.Value.Cookies.Any(e => e.Value == "web" && e.Key == "type")
+                e.Value.Cookies.Any(c => c.Value == appFile.UserId && c.Key == "clientId") &&
+                e.Value.Cookies.Any(c => c.Value == "web" && c.Key == "type")
             ).Value;
 
             if (client is not null)
@@ -771,8 +771,8 @@ namespace Application.Services.AppFileService
 
             var allClients = _webSocketWorker.GetClients();
             var client = allClients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(e => e.Value == appStoredFile.UserId && e.Key == "id") &&
-                e.Value.Cookies.Any(e => e.Value == "web" && e.Key == "type")
+                e.Value.Cookies.Any(c => c.Value == appStoredFile.UserId && c.Key == "clientId") &&
+                e.Value.Cookies.Any(c => c.Value == "web" && c.Key == "type")
             ).Value;
 
             if (client is not null)

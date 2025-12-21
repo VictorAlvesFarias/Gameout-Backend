@@ -1,8 +1,8 @@
 ﻿using Application.Attributes.Trace;
 using Application.Dtos.AppFile;
 using Application.Services.AppFileService;
-using ASP.NET_Core_Template.Attributes;
 using Domain.Queues.AppFileDtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Web.Api.Toolkit.Helpers.Api.Extensions;
@@ -25,7 +25,7 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         [Traced]
-        [ApiKeyAuthorize]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpGet("get-trace-id")]
         public async Task<ActionResult<BaseResponse<int>>> GetTraceId()
         {
@@ -34,7 +34,7 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         [Traced]
-        [ApiKeyAuthorize]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpPost("stream-file")]
         public async Task<ActionResult<DefaultResponse>> UploadFile([FromForm] AppFileStreamFileRequestDto req)
         {
@@ -43,7 +43,7 @@ namespace ASP.NET_Core_Template.Controllers
         }
         
         [Traced]
-        [ApiKeyAuthorize]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpPost("request-sync")]
         public async Task<ActionResult<DefaultResponse>> RequestSync([FromBody] AppFileSyncRequestDto req)
         {
@@ -52,7 +52,7 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         [Traced(OnCreate = true)]
-        [ApiKeyAuthorize]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpPut("update-appfile-status")]
         public async Task<ActionResult<DefaultResponse>> UpdateAppFileStatus([FromBody] UpdateAppFileStatusRequestDto request)
         {
@@ -61,7 +61,7 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         [Traced(OnCreate = true)]
-        [ApiKeyAuthorize]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpPut("update-appstoredfile-status")]
         public async Task<ActionResult<DefaultResponse>> UpdateAppStoredFileStatus([FromBody] UpdateAppStoredFileStatusRequestDto request)
         {

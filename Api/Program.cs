@@ -19,9 +19,14 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddSwagger();
+
+if (builder.Configuration.GetValue<bool>("Swagger:Enabled", false))
+{
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwagger();
+}
+
 builder.Services.RegisterServices(builder.Configuration);
 
 builder.Services.AddDbContext<ApplicationDbContext>(opt =>
@@ -47,13 +52,18 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (builder.Configuration.GetValue<bool>("Swagger:Enabled", false))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseCors("AllowedCorsOrigins");
+
+app.UseWebSockets(new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromSeconds(30)
+});
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

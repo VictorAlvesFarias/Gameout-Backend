@@ -4,6 +4,7 @@ using Application.Services.ApplicationLogService;
 using Application.Services.AppFileService;
 using Application.Services.Identity;
 using Application.Services.IdentityService;
+using Application.Workers;
 using Domain.Entitites.ApplicationContextDb;
 using Infrastructure.Context;
 using Infrastructure.Factories;
@@ -13,7 +14,6 @@ using Web.Api.Toolkit.Entity.Infraestructure.Factories;
 using Web.Api.Toolkit.Entity.Infraestructure.Mediators;
 using Web.Api.Toolkit.Entity.Infraestructure.Repositories;
 using Web.Api.Toolkit.Identity.Application.Extensions;
-using Web.Api.Toolkit.Ws.Application.Workers;
 
 namespace ASP.NET_Core_Template.Ioc
 {
@@ -22,9 +22,9 @@ namespace ASP.NET_Core_Template.Ioc
         public static void RegisterServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<ApplicationContext>();
-            services.AddSingleton<WebSocketWorker>();
+            services.AddSingleton<AppFileWorker>();
 
-            services.AddHostedService(provider => provider.GetRequiredService<WebSocketWorker>());
+            services.AddHostedService(provider => provider.GetRequiredService<AppFileWorker>());
 
             services.AddDefaultIdentity<ApplicationUser, IdentityRole, ApplicationDbContext>();
 
@@ -36,7 +36,6 @@ namespace ASP.NET_Core_Template.Ioc
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IApiKeyService, ApiKeyService>();
 
-            // Configure DriverApiKeyOptions
             services.Configure<DriverApiKeyOptions>(configuration.GetSection(DriverApiKeyOptions.SectionName));
         }
     }

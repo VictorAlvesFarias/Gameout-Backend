@@ -20,6 +20,7 @@ namespace ASP.NET_Core_Template.Controllers
             _applicationLogService = applicationLogService;
         }
 
+        [Authorize]
         [HttpGet("traces")]
         public ActionResult<BaseResponse<List<ApplicationLogResponseDto>>> GetAllLogs()
         {
@@ -28,6 +29,7 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         [Traced(OnCreate = true)]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpPost("add")]
         public async Task<ActionResult<BaseResponse<ApplicationLogResponseDto>>> AddLog([FromBody] ApplicationLogRequestDto request)
         {

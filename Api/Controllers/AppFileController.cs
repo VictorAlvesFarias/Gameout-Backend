@@ -1,7 +1,6 @@
 ﻿using Application.Attributes.Trace;
 using Application.Dtos.AppFile;
 using Application.Services.AppFileService;
-using ASP.NET_Core_Template.Attributes;
 using Domain.Entitites.ApplicationContextDb;
 using Domain.Queues.AppFileDtos;
 using Microsoft.AspNetCore.Authorization;

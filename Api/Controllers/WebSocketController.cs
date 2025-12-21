@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.Workers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Web.Api.Toolkit.Ws.Application.Dtos;
 using Web.Api.Toolkit.Ws.Application.Workers;
@@ -9,21 +11,46 @@ namespace ASP.NET_Core_Template.Controllers
     [Route("api/websocket")]
     public class WebSocketOrchestratorController : ControllerBase
     {
-        private readonly WebSocketWorker _webSocketWorker;
+        private readonly AppFileWorker _webSocketWorker;
         private readonly ILogger<WebSocketOrchestratorController> _logger;
 
-        public WebSocketOrchestratorController(WebSocketWorker webSocketWorker, ILogger<WebSocketOrchestratorController> logger)
+        public WebSocketOrchestratorController(AppFileWorker webSocketWorker, ILogger<WebSocketOrchestratorController> logger)
         {
             _webSocketWorker = webSocketWorker;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Endpoint WebSocket - Client conecta aqui
+        /// </summary>
+        [HttpGet("/ws")]
+        public async Task HandleWebSocket()
+        {
+            if (!HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                HttpContext.Response.StatusCode = 400;
+                await HttpContext.Response.WriteAsync("WebSocket connection required");
+                return;
+            }
+
+            var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+            await _webSocketWorker.AcceptWebSocketAsync(HttpContext, webSocket, HttpContext.RequestAborted);
+        }
+
+        /// <summary>
+        /// Obtém convite de conexão WebSocket
+        /// Aceita autenticação via JWT (Bearer) ou ApiKey (X-API-KEY header)
+        /// </summary>
         [HttpPost("connect")]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         public IActionResult GetConnectionInfo()
         {
             try
             {
-                var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Request.Cookies["id"] ?? Guid.NewGuid().ToString();
+                // Após autenticação, User.Identity.Name ou Claims terão o userId
+                var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                          ?? User?.Identity?.Name 
+                          ?? Guid.NewGuid().ToString();
 
                 if (!Guid.TryParse(userId, out var guid))
                 {
@@ -66,8 +93,50 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         /// <summary>
+        /// Obtém lista de clientes conectados
+        /// </summary>
+        [HttpGet("clients")]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
+        public IActionResult GetConnectedClients()
+        {
+            try
+            {
+                var clients = _webSocketWorker.GetClients();
+                
+                var clientList = clients.Select(c => new
+                {
+                    clientId = c.Key,
+                    instanceId = c.Value.InstanceId,
+                    socketState = c.Value.Socket.State.ToString(),
+                    headers = c.Value.Headers,
+                    cookies = c.Value.Cookies
+                }).ToList();
+
+                return Ok(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        totalClients = clientList.Count,
+                        clients = clientList
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter lista de clientes");
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Erro ao obter lista de clientes conectados"
+                });
+            }
+        }
+
+        /// <summary>
         /// Obtém estatísticas do orquestrador
         /// </summary>
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpGet("stats")]
         public IActionResult GetStatistics()
         {
