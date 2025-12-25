@@ -36,6 +36,14 @@ namespace ASP.NET_Core_Template.Controllers
             var result = await _applicationLogService.AddLog(request);
             return this.Result(result);
         }
+
+        [Authorize]
+        [HttpDelete("clear")]
+        public async Task<ActionResult<DefaultResponse>> ClearAllLogs()
+        {
+            var result = await _applicationLogService.ClearAllLogs();
+            return this.DefaultResult(result);
+        }
     }
 }
 

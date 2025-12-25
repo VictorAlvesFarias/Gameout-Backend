@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Application.Types
 {
     public enum AppFileStatusTypes
     {
+        [Description("Pending")]
         Pending = 1,
+
+        [Description("In Progress")]
         InProgress = 2,
+
+        [Description("Synced")]
         Synced = 3,
-        Unsynced = 4,
-        Error = 4,
+
+        [Description("Unsynced")]
+        Unsynced = 4
     }
 }

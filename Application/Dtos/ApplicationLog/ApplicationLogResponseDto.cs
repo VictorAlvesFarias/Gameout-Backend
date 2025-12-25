@@ -4,6 +4,7 @@ namespace Application.Dtos.ApplicationLog
     {
         public int Id { get; set; }
         public string Message { get; set; }
+        public string Details { get; set; }
         public int TraceId { get; set; }
         public string Type { get; set; }
         public string Action { get; set; }

@@ -13,7 +13,6 @@ namespace Infrastructure.Context
         public DbSet<AppFile> AppFile { get; set; }
         public DbSet<AppStoredFile> AppStoredFile { get; set; }
         public DbSet<StoredFile> StoredFile { get; set; }
-        public DbSet<AppFileLog> AppFileLog { get; set; }
         public DbSet<UserApiKey> UserApiKey { get; set; }
         public DbSet<ApplicationLog> ApplicationLog { get; set; }
         public DbSet<Trace> Trace { get; set; }
@@ -88,35 +87,6 @@ namespace Infrastructure.Context
                       .HasForeignKey(x => x.StoredFileId)
                       .OnDelete(DeleteBehavior.SetNull)
                       .IsRequired(false);
-            });
-
-            modelBuilder.Entity<AppFileLog>(entity =>
-            {
-                entity.ToTable("AppFileLogs");
-
-                entity.HasKey(x => x.Id);
-
-                entity.Property(x => x.Path)
-                      .HasMaxLength(500)
-                      .IsRequired(false);
-
-                entity.Property(x => x.RecordName)
-                      .HasMaxLength(200)
-                      .IsRequired(false);
-
-                entity.Property(x => x.ActionMessage)
-                      .HasMaxLength(1000)
-                      .IsRequired();
-
-                entity.Property(x => x.ActionType)
-                      .IsRequired();
-
-                entity.Property(x => x.CreateDate)
-                      .IsRequired();
-
-                entity.Property(x => x.UpdateDate)
-                      .IsRequired();
-
             });
 
             modelBuilder.Entity<UserApiKey>(entity =>

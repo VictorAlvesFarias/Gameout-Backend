@@ -19,8 +19,9 @@ namespace Application.Services.AppFileService
         Task<DefaultResponse> DeleteFile(int id);
         Task<DefaultResponse> DeleteStoredFile(int id);
         Task<DefaultResponse> SingleSync(AppFileStreamFileRequestDto req);
-        Task<DefaultResponse> SetAppFileStatus(int appFileId, AppFileStatusTypes status, string statusMessage = null, string statusDetails = null);
-        Task<DefaultResponse> SetAppStoredFileStatus(int appStoredFileId, AppStoredFileStatusTypes status, string statusMessage = null, string statusDetails = null);
+        Task<DefaultResponse> SetAppFileStatus(int appFileId, AppFileStatusTypes status);
+        Task<DefaultResponse> SetAppStoredFileStatus(int appStoredFileId, AppStoredFileStatusTypes status);
         Task<DefaultResponse> CheckAppStoredFileStatus(CheckAppStoredFileStatusRequestDto request);
+        Task<DefaultResponse> CheckAppFileStatus(CheckAppFileStatusRequestDto request);
     }
 }

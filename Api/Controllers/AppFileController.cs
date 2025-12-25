@@ -74,7 +74,7 @@ namespace ASP.NET_Core_Template.Controllers
 
         [Authorize]
         [HttpPost("single-sync")]
-        public async Task<ActionResult<DefaultResponse>> SingleSync(AppFileSyncRequestDto req)
+        public async Task<ActionResult<DefaultResponse>> SingleSync([FromBody] AppFileSyncRequestDto req)
         {
             var result = await _appFileService.RequestSync(req);
             return this.DefaultResult(result);
@@ -96,11 +96,19 @@ namespace ASP.NET_Core_Template.Controllers
             return this.FileResult(result);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpPost("check-stored-file-status")]
         public async Task<ActionResult<DefaultResponse>> CheckAppStoredFileStatus([FromBody] CheckAppStoredFileStatusRequestDto request)
         {
             var result = await _appFileService.CheckAppStoredFileStatus(request);
+            return this.DefaultResult(result);
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
+        [HttpPost("check-app-file-status")]
+        public async Task<ActionResult<DefaultResponse>> CheckAppFileStatus([FromBody] CheckAppFileStatusRequestDto request)
+        {
+            var result = await _appFileService.CheckAppFileStatus(request);
             return this.DefaultResult(result);
         }
     }

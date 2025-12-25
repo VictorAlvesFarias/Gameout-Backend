@@ -1,3 +1,4 @@
+using Application.Workers;
 using ASP.NET_Core_Template.Ioc;
 using ASP.NET_Core_Template.Setups;
 using Infrastructure.Context;
@@ -64,6 +65,22 @@ app.UseWebSockets(new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromSeconds(30)
 });
+
+app.Use(async (context, next) =>
+{
+    var serviceProvider = context.RequestServices.GetRequiredService<AppFileWorker>();
+
+    if (context.WebSockets.IsWebSocketRequest)
+    {
+        await serviceProvider.AcceptWebSocketAsync(context, await context.WebSockets.AcceptWebSocketAsync(), context.RequestAborted);
+
+        return;
+    }
+
+    await next();
+});
+
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

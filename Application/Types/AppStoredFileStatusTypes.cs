@@ -1,16 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Application.Types
 {
     public enum AppStoredFileStatusTypes
     {
+        [Description("Processing")]
         Processing = 1,
+
+        [Description("Error")]
         Error = 2,
+
+        [Description("Complete")]
         Complete = 3,
-        PendingWithError = 4,
+
+        [Description("Pending with Error")]
+        PendingWithError = 4
     }
 }

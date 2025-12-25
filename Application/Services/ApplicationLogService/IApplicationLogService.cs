@@ -8,12 +8,12 @@ namespace Application.Services.ApplicationLogService
     {
         Task<int> GetTraceId();
         Task AddLogAsync(int traceId, string message, string type, string action);
-        Task AddContextTraceAsync(int traceId, string entityName, string entityId);
-        Task AddContextTraceAsync<T>(int traceId, string entityName, string entityId);
+        Task AddLogAsync(int traceId, string message, ApplicationLogType type, ApplicationLogAction action, string details = "");
         BaseResponse<List<ApplicationLogResponseDto>> GetLogsByTraceId(int traceId);
         BaseResponse<List<TraceResponseDto>> GetAllTraces();
         BaseResponse<List<ApplicationLogResponseDto>> GetAllLogs();
         Task<BaseResponse<ApplicationLogResponseDto>> AddLog(ApplicationLogRequestDto request);
+        Task<DefaultResponse> ClearAllLogs();
     }
 }
 

@@ -13,20 +13,17 @@ namespace Application.Services.ApplicationLogService
     {
         private readonly IBaseRepository<Trace> _traceRepository;
         private readonly IBaseRepository<ApplicationLog> _applicationLogRepository;
-        private readonly IBaseRepository<ContextTrace> _contextTraceRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ApplicationLogService(
             IBaseRepository<Trace> traceRepository,
             IBaseRepository<ApplicationLog> applicationLogRepository,
-            IBaseRepository<ContextTrace> contextTraceRepository,
             ApplicationDbContext context,
             IHttpContextAccessor httpContextAccessor
         )
         {
             _traceRepository = traceRepository;
             _applicationLogRepository = applicationLogRepository;
-            _contextTraceRepository = contextTraceRepository;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -63,12 +60,14 @@ namespace Application.Services.ApplicationLogService
 
         public async Task AddLogAsync(int traceId, string message, string type, string action)
         {
+            // Mantém compatibilidade com código existente, converte string para enum
             var log = new ApplicationLog
             {
                 TraceId = traceId,
                 Message = message,
-                Type = type,
-                Action = action,
+                Details = string.Empty,
+                Type = ConvertTypeToEnum(type),
+                Action = ConvertActionToEnum(action),
                 CreateDate = DateTime.Now,
                 UpdateDate = DateTime.Now
             };
@@ -76,32 +75,43 @@ namespace Application.Services.ApplicationLogService
             await _applicationLogRepository.AddAsync(log);
         }
 
-        public async Task AddContextTraceAsync<T>(int traceId, string entityName, string entityId)
+        public async Task AddLogAsync(int traceId, string message, ApplicationLogType type, ApplicationLogAction action, string details = "")
         {
-            var contextTrace = new ContextTrace
+            var log = new ApplicationLog
             {
                 TraceId = traceId,
-                EntityName = nameof(T),
-                EntityId = entityId,
+                Message = message,
+                Details = details ?? string.Empty,
+                Type = (int)type,
+                Action = (int)action,
                 CreateDate = DateTime.Now,
                 UpdateDate = DateTime.Now
             };
 
-            await _contextTraceRepository.AddAsync(contextTrace);
+            await _applicationLogRepository.AddAsync(log);
         }
 
-        public async Task AddContextTraceAsync(int traceId, string entityName, string entityId)
+        private int ConvertTypeToEnum(string type)
         {
-            var contextTrace = new ContextTrace
+            return type?.ToLower() switch
             {
-                TraceId = traceId,
-                EntityName = entityName,
-                EntityId = entityId,
-                CreateDate = DateTime.Now,
-                UpdateDate = DateTime.Now
+                "code" => (int)ApplicationLogType.Code,
+                "exception" => (int)ApplicationLogType.Exception,
+                "json" => (int)ApplicationLogType.Json,
+                "query" => (int)ApplicationLogType.Query,
+                _ => (int)ApplicationLogType.Message
             };
+        }
 
-            await _contextTraceRepository.AddAsync(contextTrace);
+        private int ConvertActionToEnum(string action)
+        {
+            return action?.ToLower() switch
+            {
+                "error" => (int)ApplicationLogAction.Error,
+                "warning" => (int)ApplicationLogAction.Warning,
+                "success" => (int)ApplicationLogAction.Success,
+                _ => (int)ApplicationLogAction.Info
+            };
         }
 
         public BaseResponse<List<ApplicationLogResponseDto>> GetLogsByTraceId(int traceId)
@@ -113,8 +123,9 @@ namespace Application.Services.ApplicationLogService
                 {
                     Id = x.Id,
                     Message = x.Message,
-                    Type = x.Type,
-                    Action = x.Action,
+                    Details = x.Details,
+                    Type = ((ApplicationLogType)x.Type).ToString(),
+                    Action = ((ApplicationLogAction)x.Action).ToString(),
                     TraceId = x.TraceId,
                     CreateDate = x.CreateDate,
                     UpdateDate = x.UpdateDate,
@@ -162,8 +173,9 @@ namespace Application.Services.ApplicationLogService
                  {
                      Id = x.Id,
                      Message = x.Message,
-                     Type = x.Type,
-                     Action = x.Action,
+                     Details = x.Details,
+                     Type = ((ApplicationLogType)x.Type).ToString(),
+                     Action = ((ApplicationLogAction)x.Action).ToString(),
                      TraceId = x.TraceId,
                      CreateDate = x.CreateDate,
                      UpdateDate = x.UpdateDate,
@@ -187,8 +199,9 @@ namespace Application.Services.ApplicationLogService
             {
                 TraceId = traceId,
                 Message = request.Message,
-                Type = request.Type,
-                Action = request.Action,
+                Details = request.Details ?? string.Empty,
+                Type = (int)request.Type,
+                Action = (int)request.Action,
                 CreateDate = DateTime.Now,
                 UpdateDate = DateTime.Now
             };
@@ -199,8 +212,9 @@ namespace Application.Services.ApplicationLogService
             {
                 Id = result.Id,
                 Message = result.Message,
-                Type = result.Type,
-                Action = result.Action,
+                Details = result.Details,
+                Type = request.Type.ToString(),
+                Action = request.Action.ToString(),
                 TraceId = result.TraceId,
                 CreateDate = result.CreateDate,
                 UpdateDate = result.UpdateDate,
@@ -213,6 +227,34 @@ namespace Application.Services.ApplicationLogService
             };
 
             return response;
+        }
+
+        public async Task<DefaultResponse> ClearAllLogs()
+        {
+            var response = new DefaultResponse(true);
+
+            try
+            {
+                var logs = _applicationLogRepository.Get().ToList();
+                var traces = _traceRepository.Get().ToList();
+
+                foreach (var l in logs)
+                {
+                    _applicationLogRepository.Remove(l);
+                }
+
+                foreach (var t in traces)
+                {
+                    _traceRepository.Remove(t);
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.AddError(new ErrorMessage($"Error clearing logs: {ex.Message}"));
+                return response;
+            }
         }
     }
 }

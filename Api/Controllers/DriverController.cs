@@ -56,7 +56,7 @@ namespace ASP.NET_Core_Template.Controllers
         [HttpPut("update-appfile-status")]
         public async Task<ActionResult<DefaultResponse>> UpdateAppFileStatus([FromBody] UpdateAppFileStatusRequestDto request)
         {
-            var result = await _appFileService.SetAppFileStatus(request.AppFileId, request.Status, request.StatusMessage, request.StatusDetails);
+            var result = await _appFileService.SetAppFileStatus(request.AppFileId, request.Status);
             return this.DefaultResult(result);
         }
 
@@ -65,7 +65,7 @@ namespace ASP.NET_Core_Template.Controllers
         [HttpPut("update-appstoredfile-status")]
         public async Task<ActionResult<DefaultResponse>> UpdateAppStoredFileStatus([FromBody] UpdateAppStoredFileStatusRequestDto request)
         {
-            var result = await _appFileService.SetAppStoredFileStatus(request.AppStoredFileId, request.Status, request.StatusMessage, request.StatusDetails);
+            var result = await _appFileService.SetAppStoredFileStatus(request.AppStoredFileId, request.Status);
             return this.DefaultResult(result);
         }
     }

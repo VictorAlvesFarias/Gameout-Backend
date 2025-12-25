@@ -14,7 +14,7 @@ namespace Infrastructure.Mediators
         public DatabaseContextMediator(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
-        }
+        } 
 
         public IQueryable<T> Handle(IQueryable<T> query, DbContext context, bool ignoreUserId)
         {

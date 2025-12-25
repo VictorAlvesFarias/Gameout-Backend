@@ -18,6 +18,7 @@ namespace ASP.NET_Core_Template.Controllers
             _identityService = identityService;
         }
 
+        [AllowAnonymous]
         [HttpPost("/create-user")]
         public async Task<ActionResult<DefaultResponse>> CreateUser([FromBody] CreateUserRequest userData)
         {
