@@ -38,28 +38,25 @@ namespace ASP.NET_Core_Template.Middleware
                 return AuthenticateResult.Fail("API Key was not provided");
             }
 
-            // Buscar API key no banco de dados
-            var userApiKey = await _context.Set<UserApiKey>()
-                .FirstOrDefaultAsync(x => x.ApiKey == providedApiKey && x.IsActive);
+            var userApiKey = await _context.Set<UserApiKey>().FirstOrDefaultAsync(x => x.ApiKey == providedApiKey && x.IsActive);
 
             if (userApiKey == null)
             {
                 return AuthenticateResult.Fail("Invalid API Key");
             }
 
-            // Atualizar último uso
             userApiKey.LastUsed = DateTime.UtcNow;
             userApiKey.UpdateDate = DateTime.UtcNow;
+
             _context.Set<UserApiKey>().Update(userApiKey);
+
             await _context.SaveChangesAsync();
 
-            // Criar claims com o UserId para que o mediator funcione
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, userApiKey.UserId),
                 new Claim(ClaimTypes.Name, "Driver")
             };
-
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);

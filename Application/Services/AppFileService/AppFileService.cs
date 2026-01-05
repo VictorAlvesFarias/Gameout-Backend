@@ -137,11 +137,17 @@ namespace Application.Services.AppFileService
             {
                 response.AddError(new ErrorMessage("Failed to download file. The file may not exist or may be corrupted."));
 
-                await _applicationLogService.AddLogAsync(traceId, "File inserted unsuccessfully", ApplicationLogType.Message, ApplicationLogAction.Error);
+                await _applicationLogService.AddLogAsync(traceId, "File download failed", ApplicationLogType.Message, ApplicationLogAction.Error);
             }
             else
             {
-                await _applicationLogService.AddLogAsync(traceId, "File inserted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
+                // Garantir que o nome do arquivo tenha a extensão .zip
+                if (!string.IsNullOrEmpty(result.Name) && !result.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Name = $"{result.Name}.zip";
+                }
+
+                await _applicationLogService.AddLogAsync(traceId, "File downloaded successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
 
                 response.Data = result;
             }
@@ -188,10 +194,15 @@ namespace Application.Services.AppFileService
 
             if (clientDriver is not null)
             {
+                var headers = new Dictionary<string, string>();
+
+                headers.Add("X-Trace-Application-Id", traceId.ToString());
+
                 _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
                 {
                     Event = "SetEvents",
-                    Body = ""
+                    Body = "",
+                    Headers = headers
                 });
             }
             else
@@ -433,7 +444,18 @@ namespace Application.Services.AppFileService
 
             using var memoryStream = new MemoryStream();
 
-            req.File.CopyTo(memoryStream);
+            await req.File.CopyToAsync(memoryStream);
+            
+            var fileBytes = memoryStream.ToArray();
+
+            if (fileBytes.Length == 0)
+            {
+                response.AddError(new ErrorMessage("Failed to perform single sync. The uploaded file is empty."));
+                await _applicationLogService.AddLogAsync(traceId, "Single sync failed because uploaded file is empty", ApplicationLogType.Message, ApplicationLogAction.Error);
+                return response;
+            }
+
+            await _applicationLogService.AddLogAsync(traceId, $"File received with {fileBytes.Length} bytes", ApplicationLogType.Message, ApplicationLogAction.Info);
 
             var appStoredFileOld = _appStoredFileRepository.Get()
                 .Where(e => e.Status == (int)AppStoredFileStatusTypes.Complete && e.AppFileId == appFile.Id)
@@ -443,7 +465,7 @@ namespace Application.Services.AppFileService
 
             var storedFile = new StoredFile()
             {
-                Bytes = memoryStream.ToArray(),
+                Bytes = fileBytes,
                 Name = appStoredFile.AppFile.Name,
                 MimeType = "application/zip",
                 SizeInBytes = req.OriginalFileSize
@@ -653,6 +675,10 @@ namespace Application.Services.AppFileService
 
             if (clientDriver is not null)
             {
+                var headers = new Dictionary<string, string>();
+
+                headers.Add("X-Trace-Application-Id", traceId.ToString());
+
                 _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
                 {
                     Event = "SingleSync",
@@ -661,7 +687,8 @@ namespace Application.Services.AppFileService
                         AppStoredFileId = appStoredFileId,
                         AppFileId = appStoredFile.AppFileId,
                         Path = appStoredFile.AppFile.Path,
-                    }
+                    },
+                    Headers  = headers
                 });
 
                 await _applicationLogService.AddLogAsync(traceId, "Reprocess request sent to driver successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
@@ -951,6 +978,20 @@ namespace Application.Services.AppFileService
                 response.AddError(new ErrorMessage("Driver is not connected."));
                 await _applicationLogService.AddLogAsync(traceId, "Status check failed because driver is not connected", ApplicationLogType.Message, ApplicationLogAction.Error, $"Entity: AppFile, ID: {request.AppFileId}, Path: {appFile.Path}");
             }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<bool>> DriverIsConnected()
+        {
+            var traceId = await _applicationLogService.GetTraceId();
+            var response = new BaseResponse<bool>(true);
+            var clients = _webSocketWorker.GetClients();
+            var driverConnected = clients.Any(e =>
+                e.Value.Cookies.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
+            );
+
+            response.Data = driverConnected;
 
             return response;
         }

@@ -12,11 +12,11 @@ using Web.Api.Toolkit.Helpers.Application.Dtos;
 namespace ASP.NET_Core_Template.Controllers
 {
     [ApiController]
-    public class DriverController : ControllerBase
+    public class AppFileDriverController : ControllerBase
     {
         public readonly IAppFileService _appFileService;
 
-        public DriverController
+        public AppFileDriverController
         (
             IAppFileService appFileService
         )

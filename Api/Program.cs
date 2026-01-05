@@ -60,19 +60,44 @@ if (builder.Configuration.GetValue<bool>("Swagger:Enabled", false))
 }
 
 app.UseCors("AllowedCorsOrigins");
+app.UseHttpsRedirection();
 
+// IMPORTANTE: UseWebSockets DEVE vir ANTES de UseAuthentication
+// para que IsWebSocketRequest funcione corretamente
 app.UseWebSockets(new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromSeconds(30)
 });
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.Use(async (context, next) =>
 {
-    var serviceProvider = context.RequestServices.GetRequiredService<AppFileWorker>();
-
     if (context.WebSockets.IsWebSocketRequest)
     {
-        await serviceProvider.AcceptWebSocketAsync(context, await context.WebSockets.AcceptWebSocketAsync(), context.RequestAborted);
+        if (context.Request.Cookies.Contains(new KeyValuePair<string, string>("type", "drive")))
+        {
+            var authService = context.RequestServices.GetRequiredService<IAuthenticationService>();
+
+            var result = await authService.AuthenticateAsync(context, "ApiKey");
+
+            if (!result.Succeeded)
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return;
+            }
+
+            context.User = result.Principal;
+
+        }
+        var serviceProvider = context.RequestServices.GetRequiredService<AppFileWorker>();
+
+        await serviceProvider.AcceptWebSocketAsync(
+            context,
+            await context.WebSockets.AcceptWebSocketAsync(),
+            context.RequestAborted
+        );
 
         return;
     }
@@ -80,9 +105,5 @@ app.Use(async (context, next) =>
     await next();
 });
 
-
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
 app.MapControllers();
 app.Run();

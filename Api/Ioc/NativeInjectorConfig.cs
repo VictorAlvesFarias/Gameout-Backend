@@ -4,6 +4,7 @@ using Application.Services.ApplicationLogService;
 using Application.Services.AppFileService;
 using Application.Services.Identity;
 using Application.Services.IdentityService;
+using Application.Services.WebSocketService;
 using Application.Workers;
 using Domain.Entitites.ApplicationContextDb;
 using Infrastructure.Context;
@@ -35,6 +36,7 @@ namespace ASP.NET_Core_Template.Ioc
             services.AddScoped<IApplicationLogService, ApplicationLogService>();
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IApiKeyService, ApiKeyService>();
+            services.AddScoped<IWebSocketService, WebSocketService>();
 
             services.Configure<DriverApiKeyOptions>(configuration.GetSection(DriverApiKeyOptions.SectionName));
         }

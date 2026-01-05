@@ -56,7 +56,7 @@ namespace ASP.NET_Core_Template.Controllers
             return this.DefaultResult(result);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpGet("get-files")]
         public ActionResult<BaseResponse<List<AppFileResponseDto>>> GetFiles()
         {
@@ -110,6 +110,14 @@ namespace ASP.NET_Core_Template.Controllers
         {
             var result = await _appFileService.CheckAppFileStatus(request);
             return this.DefaultResult(result);
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
+        [HttpPost("driver-is-connected")]
+        public async Task<ActionResult<BaseResponse<bool>>> DriverIsConnected()
+        {
+            var result = await _appFileService.DriverIsConnected();
+            return this.Result(result);
         }
     }
 }
