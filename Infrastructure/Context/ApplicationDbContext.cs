@@ -44,6 +44,16 @@ namespace Infrastructure.Context
                 entity.Property(x => x.StatusMessage)
                       .HasMaxLength(256)
                       .IsRequired(false);
+
+                entity.Property(x => x.IsDeleted)
+                      .IsRequired()
+                      .HasDefaultValue(false);
+
+                entity.Property(x => x.DeletedAt)
+                      .IsRequired(false);
+
+                // Filtro global para excluir registros deletados
+                entity.HasQueryFilter(x => !x.IsDeleted);
             });
 
             modelBuilder.Entity<AppStoredFile>(entity =>
@@ -76,6 +86,13 @@ namespace Infrastructure.Context
                 entity.Property(x => x.UpdateDate)
                       .IsRequired();
 
+                entity.Property(x => x.IsDeleted)
+                      .IsRequired()
+                      .HasDefaultValue(false);
+
+                entity.Property(x => x.DeletedAt)
+                      .IsRequired(false);
+
                 entity.HasOne(x => x.AppFile)
                       .WithMany()
                       .HasForeignKey(x => x.AppFileId)
@@ -87,6 +104,9 @@ namespace Infrastructure.Context
                       .HasForeignKey(x => x.StoredFileId)
                       .OnDelete(DeleteBehavior.SetNull)
                       .IsRequired(false);
+
+                // Filtro global para excluir registros deletados
+                entity.HasQueryFilter(x => !x.IsDeleted);
             });
 
             modelBuilder.Entity<UserApiKey>(entity =>
@@ -215,6 +235,23 @@ namespace Infrastructure.Context
                       .IsRequired(true);
 
                 entity.HasIndex(x => new { x.EntityName, x.EntityId });
+            });
+
+            modelBuilder.Entity<StoredFile>(entity =>
+            {
+                entity.ToTable("StoredFile");
+
+                entity.HasKey(x => x.Id);
+
+                entity.Property(x => x.IsDeleted)
+                      .IsRequired()
+                      .HasDefaultValue(false);
+
+                entity.Property(x => x.DeletedAt)
+                      .IsRequired(false);
+
+                // Filtro global para excluir registros deletados
+                entity.HasQueryFilter(x => !x.IsDeleted);
             });
         }
     }

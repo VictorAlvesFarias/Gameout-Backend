@@ -548,13 +548,33 @@ namespace Application.Services.AppFileService
             }
             else if(appStoredFileOld is not null)
             {
-                var odlAppStoredFileUpdatedResult = _appStoredFileRepository.Remove(appStoredFileOld);
-
-                if (!odlAppStoredFileUpdatedResult)
+                // Verifica se o appStoredFileOld tem um StoredFile relacionado
+                var hasStoredFile = appStoredFileOld.StoredFileId.HasValue;
+                
+                if (hasStoredFile)
                 {
-                    response.AddError(new ErrorMessage("Failed to remove app stored file record. Database operation was unsuccessful."));
+                    // Soft delete - marca como deletado
+                    appStoredFileOld.IsDeleted = true;
+                    appStoredFileOld.DeletedAt = DateTime.Now;
+                    
+                    var odlAppStoredFileUpdatedResult = _appStoredFileRepository.Update(appStoredFileOld);
 
-                    return response;
+                    if (!odlAppStoredFileUpdatedResult)
+                    {
+                        response.AddError(new ErrorMessage("Failed to soft delete old app stored file record. Database operation was unsuccessful."));
+                        return response;
+                    }
+                }
+                else
+                {
+                    // Hard delete - remove completamente
+                    var odlAppStoredFileUpdatedResult = _appStoredFileRepository.Remove(appStoredFileOld);
+
+                    if (!odlAppStoredFileUpdatedResult)
+                    {
+                        response.AddError(new ErrorMessage("Failed to remove app stored file record. Database operation was unsuccessful."));
+                        return response;
+                    }
                 }
             }
 
@@ -581,7 +601,9 @@ namespace Application.Services.AppFileService
         public async Task<DefaultResponse> DeleteFile(int id)
         {
             var traceId = await _applicationLogService.GetTraceId();
-            var appFile = _appFileRepository.Get().FirstOrDefault(e => e.Id == id);
+            var appFile = _appFileRepository.Get()
+                .Include(e => e.User)
+                .FirstOrDefault(e => e.Id == id);
             var response = new DefaultResponse(appFile is not null);
 
             if (!response.Success)
@@ -591,17 +613,44 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            var removeAppFileResult = _appFileRepository.Remove(appFile);
-            response.Success = removeAppFileResult;
+            // Verifica se existem AppStoredFiles relacionados (incluindo os deletados)
+            var hasRelatedAppStoredFiles = _dbContext.AppStoredFile
+                .IgnoreQueryFilters()
+                .Any(e => e.AppFileId == id);
 
-            if (!response.Success)
+            if (hasRelatedAppStoredFiles)
             {
-                response.AddError(new ErrorMessage("Falha ao excluir o arquivo. A operação no banco de dados não foi bem-sucedida."));
-                await _applicationLogService.AddLogAsync(traceId, "File deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
+                // Soft delete - marca como deletado mas não remove do banco
+                appFile.IsDeleted = true;
+                appFile.DeletedAt = DateTime.Now;
+                var updateResult = _appFileRepository.Update(appFile);
+                response.Success = updateResult;
+
+                if (!response.Success)
+                {
+                    response.AddError(new ErrorMessage("Falha ao excluir o arquivo (soft delete). A operação no banco de dados não foi bem-sucedida."));
+                    await _applicationLogService.AddLogAsync(traceId, "File soft deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
+                }
+                else
+                {
+                    await _applicationLogService.AddLogAsync(traceId, "File soft deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
+                }
             }
             else
             {
-                await _applicationLogService.AddLogAsync(traceId, "File deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
+                // Hard delete - remove completamente do banco
+                var removeAppFileResult = _appFileRepository.Remove(appFile);
+                response.Success = removeAppFileResult;
+
+                if (!response.Success)
+                {
+                    response.AddError(new ErrorMessage("Falha ao excluir o arquivo. A operação no banco de dados não foi bem-sucedida."));
+                    await _applicationLogService.AddLogAsync(traceId, "File deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
+                }
+                else
+                {
+                    await _applicationLogService.AddLogAsync(traceId, "File deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
+                }
             }
 
             return response;
@@ -610,7 +659,9 @@ namespace Application.Services.AppFileService
         public async Task<DefaultResponse> DeleteStoredFile(int id)
         {
             var traceId = await _applicationLogService.GetTraceId();
-            var appStoredFile = _appStoredFileRepository.Get().FirstOrDefault(e => e.Id == id);
+            var appStoredFile = _appStoredFileRepository.Get()
+                .Include(e => e.StoredFile)
+                .FirstOrDefault(e => e.Id == id);
             var response = new DefaultResponse(appStoredFile is not null);
 
             if (!response.Success)
@@ -620,16 +671,47 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            var removeAppStoredFileResult = _appStoredFileRepository.Remove(appStoredFile);
-
-            if (!removeAppStoredFileResult)
+            // Verifica se existe um StoredFile relacionado
+            if (appStoredFile.StoredFileId.HasValue && appStoredFile.StoredFile != null)
             {
-                response.AddError(new ErrorMessage("Failed to delete stored file. The database operation was unsuccessful."));
-                await _applicationLogService.AddLogAsync(traceId, "Stored file deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
+                // Soft delete - marca como deletado mas não remove do banco
+                appStoredFile.IsDeleted = true;
+                appStoredFile.DeletedAt = DateTime.Now;
+                
+                // Também marca o StoredFile como deletado
+                appStoredFile.StoredFile.IsDeleted = true;
+                appStoredFile.StoredFile.DeletedAt = DateTime.Now;
+                
+                var updateAppStoredFileResult = _appStoredFileRepository.Update(appStoredFile);
+                var updateStoredFileResult = _storedFileRepository.Update(appStoredFile.StoredFile);
+                
+                response.Success = updateAppStoredFileResult && updateStoredFileResult;
+
+                if (!response.Success)
+                {
+                    response.AddError(new ErrorMessage("Failed to delete stored file (soft delete). The database operation was unsuccessful."));
+                    await _applicationLogService.AddLogAsync(traceId, "Stored file soft deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
+                }
+                else
+                {
+                    await _applicationLogService.AddLogAsync(traceId, "Stored file soft deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
+                }
             }
             else
             {
-                await _applicationLogService.AddLogAsync(traceId, "Stored file deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
+                // Hard delete - remove completamente do banco
+                var removeAppStoredFileResult = _appStoredFileRepository.Remove(appStoredFile);
+                response.Success = removeAppStoredFileResult;
+
+                if (!response.Success)
+                {
+                    response.AddError(new ErrorMessage("Failed to delete stored file. The database operation was unsuccessful."));
+                    await _applicationLogService.AddLogAsync(traceId, "Stored file deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
+                }
+                else
+                {
+                    await _applicationLogService.AddLogAsync(traceId, "Stored file deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
+                }
             }
 
             return response;
@@ -992,6 +1074,56 @@ namespace Application.Services.AppFileService
             );
 
             response.Data = driverConnected;
+
+            return response;
+        }
+
+        public async Task<DefaultResponse> DeleteSoftDeletedItems()
+        {
+            var traceId = await _applicationLogService.GetTraceId();
+            var response = new DefaultResponse(true);
+
+            try
+            {
+                // Busca todos os itens marcados como deletados (ignora o filtro global)
+                var deletedAppFiles = _dbContext.AppFile
+                    .IgnoreQueryFilters()
+                    .Where(e => e.IsDeleted)
+                    .ToList();
+
+                var deletedAppStoredFiles = _dbContext.AppStoredFile
+                    .IgnoreQueryFilters()
+                    .Where(e => e.IsDeleted)
+                    .Include(e => e.StoredFile)
+                    .ToList();
+
+                var deletedStoredFiles = _dbContext.StoredFile
+                    .IgnoreQueryFilters()
+                    .Where(e => e.IsDeleted)
+                    .ToList();
+
+                // Remove permanentemente todos os itens
+                _dbContext.AppFile.RemoveRange(deletedAppFiles);
+                _dbContext.AppStoredFile.RemoveRange(deletedAppStoredFiles);
+                _dbContext.StoredFile.RemoveRange(deletedStoredFiles);
+
+                await _dbContext.SaveChangesAsync();
+
+                var totalDeleted = deletedAppFiles.Count + deletedAppStoredFiles.Count + deletedStoredFiles.Count;
+
+                await _applicationLogService.AddLogAsync(
+                    traceId, 
+                    $"Permanently deleted {totalDeleted} items ({deletedAppFiles.Count} AppFiles, {deletedAppStoredFiles.Count} AppStoredFiles, {deletedStoredFiles.Count} StoredFiles)", 
+                    ApplicationLogType.Message, 
+                    ApplicationLogAction.Success
+                );
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.AddError(new ErrorMessage($"Failed to delete items permanently: {ex.Message}"));
+                await _applicationLogService.AddLogAsync(traceId, "Permanent deletion failed", ApplicationLogType.Message, ApplicationLogAction.Error, ex.Message);
+            }
 
             return response;
         }

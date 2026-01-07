@@ -24,5 +24,6 @@ namespace Application.Services.AppFileService
         Task<DefaultResponse> SetAppStoredFileStatus(int appStoredFileId, AppStoredFileStatusTypes status);
         Task<DefaultResponse> CheckAppStoredFileStatus(CheckAppStoredFileStatusRequestDto request);
         Task<DefaultResponse> CheckAppFileStatus(CheckAppFileStatusRequestDto request);
+        Task<DefaultResponse> DeleteSoftDeletedItems();
     }
 }

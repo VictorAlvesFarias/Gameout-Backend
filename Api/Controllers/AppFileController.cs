@@ -119,5 +119,13 @@ namespace ASP.NET_Core_Template.Controllers
             var result = await _appFileService.DriverIsConnected();
             return this.Result(result);
         }
+
+        [Authorize]
+        [HttpDelete("delete-soft-deleted-items")]
+        public async Task<ActionResult<DefaultResponse>> DeleteSoftDeletedItems()
+        {
+            var result = await _appFileService.DeleteSoftDeletedItems();
+            return this.DefaultResult(result);
+        }
     }
 }
