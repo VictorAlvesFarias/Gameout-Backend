@@ -6,10 +6,7 @@ namespace Application.Services.WebSocketService
 {
     public interface IWebSocketService
     {
-        Task<DefaultResponse> HandleWebSocketConnectionAsync();
-        BaseResponse<WebSocketConnectionInfoResponseDto> GetConnectionInfo();
         BaseResponse<GetConnectedClientsResponseDto> GetConnectedClients();
         BaseResponse<GetWebSocketStatisticsResponseDto> GetStatistics();
-        Task BroadcastAsync(WebSocketRequest request);
     }
 }

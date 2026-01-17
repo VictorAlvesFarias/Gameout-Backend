@@ -21,18 +21,6 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         /// <summary>
-        /// Obtém convite de conexão WebSocket
-        /// Aceita autenticação via JWT (Bearer) ou ApiKey (X-API-KEY header)
-        /// </summary>
-        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
-        [HttpPost("connect")]
-        public async Task<ActionResult<BaseResponse<WebSocketConnectionInfoResponseDto>>> GetConnectionInfo()
-        {
-            var result = _webSocketService.GetConnectionInfo();
-            return this.Result(result);
-        }
-
-        /// <summary>
         /// Obtém lista de clientes conectados
         /// </summary>
         [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]

@@ -14,7 +14,7 @@ namespace Application.Services.AppFileService
         BaseResponse<List<AppStoredFileResponseDto>> GetAppStoredFiles(int? idAppFile = null, bool? processing = false);
         Task<BaseResponse<AppFileResponseDto>> InsertFile(AppFileRequestDto req);
         Task<BaseResponse<AppFileResponseDto>> UpdateFile(AppFileRequestDto req, int id);
-        Task<BaseResponse<StoredFile>> DownloadFile(int id);
+        Task<BaseResponse<StoredFile>> DownloadFileWithToken(string token);
         Task<DefaultResponse> RequestSync(AppFileSyncRequestDto req);
         Task<DefaultResponse> ReprocessFile(int appStoredFileId);
         Task<DefaultResponse> DeleteFile(int id);

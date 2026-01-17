@@ -3,9 +3,25 @@ using ASP.NET_Core_Template.Ioc;
 using ASP.NET_Core_Template.Setups;
 using Infrastructure.Context;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Web.Api.Toolkit.Ws.Application.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configurações para arquivos sem limites de tamanho
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = null; // Sem limite
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = long.MaxValue; // Sem limite
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
 
 builder.Services.AddCors(options =>
 {
@@ -24,7 +40,9 @@ builder.Services.AddControllers();
 if (builder.Configuration.GetValue<bool>("Swagger:Enabled", false))
 {
     builder.Services.AddEndpointsApiExplorer();
+
     builder.Services.AddSwaggerGen();
+
     builder.Services.AddSwagger();
 }
 
@@ -33,7 +51,6 @@ builder.Services.RegisterServices(builder.Configuration);
 builder.Services.AddDbContext<ApplicationDbContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
-
 
 builder.Services.AddIdentityAuthentication(builder.Configuration);
 
@@ -56,54 +73,25 @@ var app = builder.Build();
 if (builder.Configuration.GetValue<bool>("Swagger:Enabled", false))
 {
     app.UseSwagger();
+
     app.UseSwaggerUI();
 }
 
 app.UseCors("AllowedCorsOrigins");
+
 app.UseHttpsRedirection();
 
-// IMPORTANTE: UseWebSockets DEVE vir ANTES de UseAuthentication
-// para que IsWebSocketRequest funcione corretamente
 app.UseWebSockets(new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromSeconds(30)
 });
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
-app.Use(async (context, next) =>
-{
-    if (context.WebSockets.IsWebSocketRequest)
-    {
-        if (context.Request.Cookies.Contains(new KeyValuePair<string, string>("type", "drive")))
-        {
-            var authService = context.RequestServices.GetRequiredService<IAuthenticationService>();
-
-            var result = await authService.AuthenticateAsync(context, "ApiKey");
-
-            if (!result.Succeeded)
-            {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return;
-            }
-
-            context.User = result.Principal;
-
-        }
-        var serviceProvider = context.RequestServices.GetRequiredService<AppFileWorker>();
-
-        await serviceProvider.AcceptWebSocketAsync(
-            context,
-            await context.WebSockets.AcceptWebSocketAsync(),
-            context.RequestAborted
-        );
-
-        return;
-    }
-
-    await next();
-});
+app.UseWebSocketEndpoint<AppFileWorker>();
 
 app.MapControllers();
+
 app.Run();

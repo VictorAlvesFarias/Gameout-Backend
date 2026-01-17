@@ -26,6 +26,7 @@ namespace Application.Services.AppFileService
         private readonly ApplicationDbContext _dbContext;
         private readonly AppFileWorker _webSocketWorker;
         private readonly IApplicationLogService _applicationLogService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AppFileService(
             IBaseRepository<AppFile> appFileRepository,
@@ -34,7 +35,8 @@ namespace Application.Services.AppFileService
             ApplicationContext applicationContext,
             ApplicationDbContext dbContext,
             AppFileWorker webSocketWorker,
-            IApplicationLogService applicationLogService
+            IApplicationLogService applicationLogService,
+            IHttpContextAccessor httpContextAccessor
         )
         {
             _appFileRepository = appFileRepository;
@@ -44,6 +46,7 @@ namespace Application.Services.AppFileService
             _dbContext = dbContext;
             _webSocketWorker = webSocketWorker;
             _applicationLogService = applicationLogService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<BaseResponse<int>> CreateTraceId()
@@ -126,18 +129,43 @@ namespace Application.Services.AppFileService
             return response;
         }
 
-        public async Task<BaseResponse<StoredFile>> DownloadFile(int id)
+        public async Task<BaseResponse<StoredFile>> DownloadFileWithToken(string token)
         {
-            var traceId = await _applicationLogService.GetTraceId();
-            var appStoredFile = _appStoredFileRepository.Get().FirstOrDefault(e => e.Id == id);
+            var httpContext = _httpContextAccessor.HttpContext;
+            
+            if (httpContext == null)
+            {
+                var errorResponse = new BaseResponse<StoredFile>();
+                errorResponse.AddError(new ErrorMessage("HTTP context not available", 500));
+                return errorResponse;
+            }
+
+            // O token já foi validado pelo ValidateDownloadTokenAttribute
+            // Apenas pegamos o fileId do HttpContext.Items
+            if (!httpContext.Items.TryGetValue("DownloadAuth_FileId", out var fileIdObj) || 
+                !int.TryParse(fileIdObj?.ToString(), out var fileId))
+            {
+                var errorResponse = new BaseResponse<StoredFile>();
+                errorResponse.AddError(new ErrorMessage("File ID not found in token", 400));
+                return errorResponse;
+            }
+
+            // O mediator já vai filtrar pelo userId que foi colocado no HttpContext.User pelo attribute
+            var appStoredFile = _appStoredFileRepository.Get().FirstOrDefault(e => e.Id == fileId);
+            
+            if (appStoredFile == null)
+            {
+                var errorResponse = new BaseResponse<StoredFile>();
+                errorResponse.AddError(new ErrorMessage("File not found or you don't have permission to download it", 404));
+                return errorResponse;
+            }
+
             var result = _storedFileRepository.Get().FirstOrDefault(e => e.Id == appStoredFile.StoredFileId);
             var response = new BaseResponse<StoredFile>(result is not null);
 
             if (!response.Success)
             {
                 response.AddError(new ErrorMessage("Failed to download file. The file may not exist or may be corrupted."));
-
-                await _applicationLogService.AddLogAsync(traceId, "File download failed", ApplicationLogType.Message, ApplicationLogAction.Error);
             }
             else
             {
@@ -146,8 +174,6 @@ namespace Application.Services.AppFileService
                 {
                     result.Name = $"{result.Name}.zip";
                 }
-
-                await _applicationLogService.AddLogAsync(traceId, "File downloaded successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
 
                 response.Data = result;
             }
@@ -186,11 +212,7 @@ namespace Application.Services.AppFileService
 
             await _applicationLogService.AddLogAsync(traceId, "File updated successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
 
-            var clients = _webSocketWorker.GetClients();
-            var clientDriver = clients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(h => h.Value.Equals(appFile.UserId) && h.Key.Equals("id")) &&
-                e.Value.Cookies.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
-            ).Value;
+            var clientDriver = _webSocketWorker.GetDriveClient(appFile.UserId);
 
             if (clientDriver is not null)
             {
@@ -363,11 +385,7 @@ namespace Application.Services.AppFileService
 
             this.SetAppFileStatus(req.IdAppFile, AppFileStatusTypes.Pending);
 
-            var clients = _webSocketWorker.GetClients();
-            var clientDriver = clients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(h => h.Value.Equals(appFile.UserId) && h.Key.Equals("id")) &&
-                e.Value.Cookies.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
-            ).Value;
+            var clientDriver = _webSocketWorker.GetDriveClient(appFile.UserId);
 
             if (clientDriver is not null)
             {
@@ -396,11 +414,7 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            var allClients = _webSocketWorker.GetClients();
-            var client = allClients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(c => c.Value == appFile.UserId && c.Key == "id") &&
-                e.Value.Cookies.Any(c => c.Value == "web" && c.Key == "type")
-            ).Value;
+            var client = _webSocketWorker.GetWebClient(appFile.UserId);
 
             if (client is not null)
             {
@@ -578,11 +592,7 @@ namespace Application.Services.AppFileService
                 }
             }
 
-            var allClients = _webSocketWorker.GetClients();
-            var client = allClients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(c => c.Value == appFile.UserId && c.Key == "id") &&
-                e.Value.Cookies.Any(c => c.Value == "web" && c.Key == "type")
-            ).Value;
+            var client = _webSocketWorker.GetWebClient(appFile.UserId);
 
             if (client is not null)
             {
@@ -749,11 +759,7 @@ namespace Application.Services.AppFileService
 
             await _applicationLogService.AddLogAsync(traceId, "File marked for reprocessing", ApplicationLogType.Message, ApplicationLogAction.Info);
 
-            var clients = _webSocketWorker.GetClients();
-            var clientDriver = clients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(h => h.Value.Equals(appStoredFile.AppFile.UserId) && h.Key.Equals("id")) &&
-                e.Value.Cookies.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
-            ).Value;
+            var clientDriver = _webSocketWorker.GetDriveClient(appStoredFile.AppFile.UserId);
 
             if (clientDriver is not null)
             {
@@ -824,11 +830,7 @@ namespace Application.Services.AppFileService
                 response.Errors.Add(new ErrorMessage("Failed to request synchronization. The update is failed."));
             }
 
-            var allClients = _webSocketWorker.GetClients();
-            var client = allClients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(c => c.Value == appFile.UserId && c.Key == "id") &&
-                e.Value.Cookies.Any(c => c.Value == "web" && c.Key == "type")
-            ).Value;
+            var client = _webSocketWorker.GetWebClient(appFile.UserId);
 
             if (client is not null)
             {
@@ -934,11 +936,7 @@ namespace Application.Services.AppFileService
                 }
             }
 
-            var allClients = _webSocketWorker.GetClients();
-            var client = allClients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(c => c.Value == appStoredFile.UserId && c.Key == "id") &&
-                e.Value.Cookies.Any(c => c.Value == "web" && c.Key == "type")
-            ).Value;
+            var client = _webSocketWorker.GetWebClient(appStoredFile.UserId);
 
             if (client is not null)
             {
@@ -969,11 +967,7 @@ namespace Application.Services.AppFileService
 
             await _applicationLogService.AddLogAsync(traceId, "Status check initiated", ApplicationLogType.Message, ApplicationLogAction.Info);
 
-            var clients = _webSocketWorker.GetClients();
-            var clientDriver = clients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(h => h.Value.Equals(appStoredFile.UserId) && h.Key.Equals("id")) &&
-                e.Value.Cookies.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
-            ).Value;
+            var clientDriver = _webSocketWorker.GetDriveClient(appStoredFile.UserId);
 
             if (clientDriver is not null)
             {
@@ -1028,11 +1022,7 @@ namespace Application.Services.AppFileService
                 .OrderByDescending(e => e.CreateDate)
                 .FirstOrDefault();
 
-            var clients = _webSocketWorker.GetClients();
-            var clientDriver = clients.FirstOrDefault(e =>
-                e.Value.Cookies.Any(h => h.Value.Equals(appFile.UserId) && h.Key.Equals("id")) &&
-                e.Value.Cookies.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
-            ).Value;
+            var clientDriver = _webSocketWorker.GetDriveClient(appFile.UserId);
 
             if (clientDriver is not null)
             {
@@ -1070,7 +1060,8 @@ namespace Application.Services.AppFileService
             var response = new BaseResponse<bool>(true);
             var clients = _webSocketWorker.GetClients();
             var driverConnected = clients.Any(e =>
-                e.Value.Cookies.Any(h => h.Value.Equals("drive") && h.Key.Equals("type"))
+                e.Value.Context != null &&
+                e.Value.Context.TryGetValue("type", out var type) && type == "drive"
             );
 
             response.Data = driverConnected;

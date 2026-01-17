@@ -1,6 +1,8 @@
-﻿using Application.Attributes.Trace;
+﻿using Application.Attributes.DownloadAuth;
+using Application.Attributes.Trace;
 using Application.Dtos.AppFile;
 using Application.Services.AppFileService;
+using Application.Services.DownloadSignatureService;
 using Domain.Entitites.ApplicationContextDb;
 using Domain.Queues.AppFileDtos;
 using Microsoft.AspNetCore.Authorization;
@@ -13,14 +15,17 @@ namespace ASP.NET_Core_Template.Controllers
     public class AppFileController : Controller
     {
         public readonly IAppFileService _appFileService;
+        private readonly IDownloadSignatureService _downloadSignatureService;
         private readonly Controller _controller;
 
         public AppFileController
         (
-            IAppFileService appFileService
+            IAppFileService appFileService,
+            IDownloadSignatureService downloadSignatureService
         )
         {
             _appFileService = appFileService;
+            _downloadSignatureService = downloadSignatureService;
             _controller = this;
         }
 
@@ -89,11 +94,19 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         [Authorize]
-        [HttpGet("download-file")]
-        public async Task<IActionResult> DownloadFile(int id)
+        [HttpGet("generate-download-url")]
+        public ActionResult<BaseResponse<string>> GenerateDownloadUrl(int id)
         {
-            var result = await _appFileService.DownloadFile(id);
-            return this.FileResult(result);
+            var result = _downloadSignatureService.GenerateSignedDownloadUrl(id);
+            return this.Result(result);
+        }
+
+        [HttpGet("download-file-signed")]
+        [ValidateDownloadToken]
+        public async Task<IActionResult> DownloadFileSigned(string token)
+        {
+            var result = await _appFileService.DownloadFileWithToken(token);
+            return this.FileResult(result, true);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]

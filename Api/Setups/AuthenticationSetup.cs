@@ -28,6 +28,7 @@ public static class AuthenticationSetup
         {
             options.Issuer = JwtAppSettings.Issuer;
             options.Audience = JwtAppSettings.Audience;
+            options.SecurityKey = JwtAppSettings.SecurityKey;
             options.SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512);
             options.AccessTokenExpiration = JwtAppSettings.AccessTokenExpiration;
         });

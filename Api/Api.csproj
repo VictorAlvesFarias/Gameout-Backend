@@ -17,12 +17,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.36" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
-    <PackageReference Include="Web.Api.Toolkit.Helpers.Api" Version="1.0.31" />
-    <PackageReference Include="Web.Api.Toolkit.Identity.Application" Version="1.0.31" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Db\" />
+    <PackageReference Include="Web.Api.Toolkit.Helpers.Api" Version="1.0.41" />
+    <PackageReference Include="Web.Api.Toolkit.Identity.Application" Version="1.0.41" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,6 +2,7 @@
 using Application.Services.ApiKeyService;
 using Application.Services.ApplicationLogService;
 using Application.Services.AppFileService;
+using Application.Services.DownloadSignatureService;
 using Application.Services.Identity;
 using Application.Services.IdentityService;
 using Application.Services.WebSocketService;
@@ -37,8 +38,11 @@ namespace ASP.NET_Core_Template.Ioc
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IApiKeyService, ApiKeyService>();
             services.AddScoped<IWebSocketService, WebSocketService>();
+            services.AddSingleton<IDownloadSignatureService, DownloadSignatureService>();
 
             services.Configure<DriverApiKeyOptions>(configuration.GetSection(DriverApiKeyOptions.SectionName));
+            services.Configure<DownloadOptions>(configuration.GetSection(DownloadOptions.SectionName));
+            services.Configure<Application.Configuration.WebSocketOptions>(configuration.GetSection(Application.Configuration.WebSocketOptions.SectionName));
         }
     }
 }
