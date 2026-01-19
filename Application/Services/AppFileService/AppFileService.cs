@@ -69,7 +69,7 @@ namespace Application.Services.AppFileService
                 VersionControl = req.VersionControl,
                 Observer = req.Observer,
                 AutoValidateSync = req.AutoValidateSync,
-                Status = (int)AppFileStatusTypes.Pending
+                Status = (int)AppFileStatusTypes.Unsynced
             };
             var appFileAddResult = await _appFileRepository.AddAsync(appFile);
             var response = new BaseResponse<AppFileResponseDto>(appFileAddResult is not null);
@@ -307,7 +307,8 @@ namespace Application.Services.AppFileService
                         (
                             e.Status == (int)AppStoredFileStatusTypes.Processing ||
                             e.Status == (int)AppStoredFileStatusTypes.Error ||
-                            e.Status == (int)AppStoredFileStatusTypes.PendingWithError ||
+                            e.Status == (int)AppStoredFileStatusTypes.PathNotFounded ||
+                            e.Status == (int)AppStoredFileStatusTypes.LockedFiles ||
                             e.Status == null
                         )
                     );
@@ -516,25 +517,30 @@ namespace Application.Services.AppFileService
             var hasProcessing = allAppStoredFiles.Any(e => 
                 e.Status == (int)AppStoredFileStatusTypes.Processing || 
                 e.Status == null);
-            var hasErrors = allAppStoredFiles.Any(e => 
-                e.Status == (int)AppStoredFileStatusTypes.Error || 
-                e.Status == (int)AppStoredFileStatusTypes.PendingWithError);
+            var hasPathNotFounded = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.PathNotFounded);
+            var hasLockedFiles = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.LockedFiles);
+            var hasErrors = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.Error);
             var allComplete = allAppStoredFiles.All(e => 
                 e.Status == (int)AppStoredFileStatusTypes.Complete);
 
             if (hasProcessing)
             {
                 // Ainda tem arquivos sendo processados
-                appFile.Update(status: (int)AppFileStatusTypes.InProgress, statusMessage: AppFileStatusTypes.InProgress.GetDescription(), statusDetails: ((int)AppFileStatusTypes.InProgress).ToString());
+                appFile.Update(status: (int)AppFileStatusTypes.Processing, statusMessage: AppFileStatusTypes.Processing.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Processing).ToString());
             }
             else if (allComplete)
             {
                 // Todos processados com sucesso
                 appFile.Update(status: (int)AppFileStatusTypes.Synced, statusMessage: AppFileStatusTypes.Synced.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Synced).ToString());
             }
+            else if (hasPathNotFounded)
+            {
+                // Tem arquivos com caminho não encontrado
+                appFile.Update(status: (int)AppFileStatusTypes.PathNotFounded, statusMessage: AppFileStatusTypes.PathNotFounded.GetDescription(), statusDetails: ((int)AppFileStatusTypes.PathNotFounded).ToString());
+            }
             else if (hasErrors)
             {
-                // Todos processados mas com erros
+                // Tem arquivos com erro genérico ou outros erros
                 appFile.Update(status: (int)AppFileStatusTypes.Unsynced, statusMessage: AppFileStatusTypes.Unsynced.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Unsynced).ToString());
             }
             
@@ -895,37 +901,40 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            // Verificar status de todos os AppStoredFiles para atualizar AppFile
-            var allAppStoredFiles = _appStoredFileRepository.Get()
-                .Where(e => e.AppFileId == appStoredFile.AppFileId)
-                .ToList();
-
+            var allAppStoredFiles = _appStoredFileRepository.Get().Where(e => e.AppFileId == appStoredFile.AppFileId).ToList();
             var hasProcessing = allAppStoredFiles.Any(e => 
                 e.Status == (int)AppStoredFileStatusTypes.Processing || 
-                e.Status == null);
-            var hasErrors = allAppStoredFiles.Any(e => 
-                e.Status == (int)AppStoredFileStatusTypes.Error || 
-                e.Status == (int)AppStoredFileStatusTypes.PendingWithError);
+                e.Status == null
+            );
+            var hasPathNotFounded = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.PathNotFounded);
+            var hasLockedFiles = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.LockedFiles);
+            var hasErrors = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.Error);
             var allComplete = allAppStoredFiles.All(e => 
-                e.Status == (int)AppStoredFileStatusTypes.Complete);
-
+                e.Status == (int)AppStoredFileStatusTypes.Complete
+            );
             var appFile = _appFileRepository.Get().FirstOrDefault(e => e.Id == appStoredFile.AppFileId);
+            
             if (appFile != null)
             {
                 if (hasProcessing)
                 {
-                    // Ainda tem arquivos sendo processados
-                    appFile.Update(status: (int)AppFileStatusTypes.InProgress, statusMessage: AppFileStatusTypes.InProgress.GetDescription(), statusDetails: ((int)AppFileStatusTypes.InProgress).ToString());
+                    appFile.Update(status: (int)AppFileStatusTypes.Processing, statusMessage: AppFileStatusTypes.Processing.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Processing).ToString());
                 }
                 else if (allComplete)
                 {
-                    // Todos processados com sucesso
                     appFile.Update(status: (int)AppFileStatusTypes.Synced, statusMessage: AppFileStatusTypes.Synced.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Synced).ToString());
+                }
+                else if (hasPathNotFounded)
+                {
+                    appFile.Update(status: (int)AppFileStatusTypes.PathNotFounded, statusMessage: AppFileStatusTypes.PathNotFounded.GetDescription(), statusDetails: ((int)AppFileStatusTypes.PathNotFounded).ToString());
                 }
                 else if (hasErrors)
                 {
-                    // Todos processados mas com erros
                     appFile.Update(status: (int)AppFileStatusTypes.Unsynced, statusMessage: AppFileStatusTypes.Unsynced.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Unsynced).ToString());
+                }
+                else if (hasLockedFiles)
+                {
+                    appFile.Update(status: (int)AppFileStatusTypes.LockedFiles, statusMessage: AppFileStatusTypes.LockedFiles.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Unsynced).ToString());
                 }
 
                 var appFileUpdateResult = _appFileRepository.Update(appFile);

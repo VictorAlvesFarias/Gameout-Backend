@@ -4,16 +4,22 @@ namespace Application.Types
 {
     public enum AppStoredFileStatusTypes
     {
-        [Description("Processing")]
-        Processing = 1,
+        [Description("Pending")]
+        Pending = 1,
 
-        [Description("Error")]
-        Error = 2,
+        [Description("Items in processing")]
+        Processing = 2,
 
-        [Description("Complete")]
+        [Description("Synced")]
         Complete = 3,
 
-        [Description("Pending with Error")]
-        PendingWithError = 4
+        [Description("Error during processing")]
+        Error = 4,
+
+        [Description("Path not founded")]
+        PathNotFounded = 5,
+
+        [Description("Locked files")]
+        LockedFiles = 6,
     }
 }

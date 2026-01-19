@@ -7,13 +7,19 @@ namespace Application.Types
         [Description("Pending")]
         Pending = 1,
 
-        [Description("In Progress")]
-        InProgress = 2,
+        [Description("Items in processing")]
+        Processing = 2,
 
         [Description("Synced")]
         Synced = 3,
 
         [Description("Unsynced")]
-        Unsynced = 4
+        Unsynced = 4,
+
+        [Description("Path not founded")]
+        PathNotFounded = 5,
+
+        [Description("Locked files")]
+        LockedFiles = 6
     }
 }
