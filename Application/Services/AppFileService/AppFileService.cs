@@ -6,11 +6,11 @@ using Application.Workers;
 using Domain.Entitites.ApplicationContextDb;
 using Domain.Queues.AppFileDtos;
 using Infrastructure.Context;
+using Infrastructure.Mediators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using System.IO.Compression;
 using Web.Api.Toolkit.Entity.Infraestructure.Repositories;
 using Web.Api.Toolkit.Helpers.Application.Dtos;
 using Web.Api.Toolkit.Ws.Application.Dtos;
@@ -23,7 +23,6 @@ namespace Application.Services.AppFileService
         private readonly IBaseRepository<AppStoredFile> _appStoredFileRepository;
         private readonly IBaseRepository<StoredFile> _storedFileRepository;
         private readonly ApplicationContext _applicationContext;
-        private readonly ApplicationDbContext _dbContext;
         private readonly AppFileWorker _webSocketWorker;
         private readonly IApplicationLogService _applicationLogService;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -33,7 +32,6 @@ namespace Application.Services.AppFileService
             IBaseRepository<StoredFile> storedFileRepository,
             IBaseRepository<AppStoredFile> appStoredFileRepository,
             ApplicationContext applicationContext,
-            ApplicationDbContext dbContext,
             AppFileWorker webSocketWorker,
             IApplicationLogService applicationLogService,
             IHttpContextAccessor httpContextAccessor
@@ -43,7 +41,6 @@ namespace Application.Services.AppFileService
             _storedFileRepository = storedFileRepository;
             _appStoredFileRepository = appStoredFileRepository;
             _applicationContext = applicationContext;
-            _dbContext = dbContext;
             _webSocketWorker = webSocketWorker;
             _applicationLogService = applicationLogService;
             _httpContextAccessor = httpContextAccessor;
@@ -125,6 +122,35 @@ namespace Application.Services.AppFileService
             var traceId = _applicationLogService.GetTraceId().Result;
 
             response.Data = result.Select(responseMapper).ToList();
+
+            return response;
+        }
+
+        public BaseResponse<AppFileResponseDto> GetFileById(int id)
+        {
+            var appFile = _appFileRepository.Get().FirstOrDefault(e => e.Id == id);
+            var response = new BaseResponse<AppFileResponseDto>(appFile != null);
+
+            if (!response.Success)
+            {
+                response.AddError(new ErrorMessage("File not found"));
+                return response;
+            }
+
+            response.Data = new AppFileResponseDto
+            {
+                Id = appFile.Id,
+                Name = appFile.Name,
+                Path = appFile.Path,
+                VersionControl = appFile.VersionControl,
+                Observer = appFile.Observer,
+                CreateDate = appFile.CreateDate,
+                UpdateDate = appFile.UpdateDate,
+                AutoValidateSync = appFile.AutoValidateSync,
+                Status = appFile.Status,
+                StatusDetails = appFile.StatusDetails,
+                StatusMessage = appFile.StatusMessage
+            };
 
             return response;
         }
@@ -255,77 +281,16 @@ namespace Application.Services.AppFileService
             return response;
         }
 
-        public BaseResponse<List<AppStoredFileResponseDto>> GetAppStoredFiles(int? idAppFile = null, bool? processing = false)
+        public BaseResponse<List<AppStoredFileResponseDto>> GetAppStoredFiles(int idAppFile)
         {
             var traceId = _applicationLogService.GetTraceId().Result;
+            var response = new BaseResponse<List<AppStoredFileResponseDto>>();
 
-            var appStoredFilesQuery = _appStoredFileRepository
+            response.Data = _appStoredFileRepository
                 .Get()
-                .Include(e => e.StoredFile)
                 .Include(e => e.AppFile)
-                .Where(e =>
-                    idAppFile != null? e.AppFileId == idAppFile : true
-                );
-
-            IQueryable<AppStoredFile> finalQuery;
-
-            if (!(processing ?? false))
-            {
-                finalQuery = appStoredFilesQuery
-                    .Where(e =>
-                        e.StoredFileId != null &&
-                        (
-                            e.Status == (int)AppStoredFileStatusTypes.Complete
-                        )
-                    )
-                    .Select(e => new AppStoredFile()
-                    {
-                        StoredFile = new StoredFile
-                        {
-                            Id = e.StoredFile.Id,
-                            Name = e.StoredFile.Name,
-                            MimeType = e.StoredFile.MimeType,
-                            CreateDate = e.StoredFile.CreateDate,
-                            UpdateDate = e.StoredFile.UpdateDate,
-                            SizeInBytes = e.StoredFile.SizeInBytes,
-                            Bytes = null
-                        },
-                        AppFileId = e.AppFileId,
-                        CreateDate = e.CreateDate,
-                        UpdateDate = e.UpdateDate,
-                        Status = e.Status,
-                        StatusDetails = e.StatusDetails,
-                        StatusMessage = e.StatusMessage,
-                        Id = e.Id,
-                    });                                             
-            }
-            else
-            {
-                finalQuery = appStoredFilesQuery
-                    .Where(e =>
-                        e.StoredFileId == null &&
-                        (
-                            e.Status == (int)AppStoredFileStatusTypes.Processing ||
-                            e.Status == (int)AppStoredFileStatusTypes.Error ||
-                            e.Status == (int)AppStoredFileStatusTypes.PathNotFounded ||
-                            e.Status == (int)AppStoredFileStatusTypes.LockedFiles ||
-                            e.Status == null
-                        )
-                    );
-            }
-
-            var appStoredFiles = finalQuery.ToList();
-            var response = new BaseResponse<List<AppStoredFileResponseDto>>(appStoredFiles is not null);
-
-            if (!response.Success)
-            {
-                response.AddError(new ErrorMessage("Failed to retrieve stored files. Please try again later."));
-
-                _applicationLogService.AddLogAsync(traceId, "Failed to retrieve stored files. Please try again later.", ApplicationLogType.Message, ApplicationLogAction.Error).Wait();
-            }
-            else
-            {
-                response.Data = appStoredFiles.Select(e =>
+                .Where(e => e.AppFileId == idAppFile)
+                .Select(e =>
                     new AppStoredFileResponseDto()
                     {
                         Id = e.Id,
@@ -333,16 +298,9 @@ namespace Application.Services.AppFileService
                         CreateDate = e.CreateDate,
                         UpdateDate = e.UpdateDate,
                         StoredFileId = e.StoredFileId,
-                        Versioned = e.Versioned,
-                        Name = e?.AppFile?.Name,
-                        Path = e?.AppFile?.Path,
-                        SizeInBytes = e?.StoredFile?.SizeInBytes,
-                        Status = e.Status,
-                        StatusDetails = e.StatusDetails,
-                        StatusMessage = e.StatusMessage
+                        SizeInBytes = e.StoredFile.SizeInBytes
                     }
-                ).ToList();
-            }
+                ).OrderByDescending(e=>e.CreateDate).ToList();
 
             return response;
         }
@@ -356,42 +314,30 @@ namespace Application.Services.AppFileService
             if (!response.Success)
             {
                 response.Errors.Add(new ErrorMessage("Failed to request synchronization. The file with the specified ID was not found."));
-
                 await _applicationLogService.AddLogAsync(traceId, "Sync request failed because file was not found", ApplicationLogType.Message, ApplicationLogAction.Error);
-
                 return response;
             }
 
             await _applicationLogService.AddLogAsync(traceId, "Sync request initiated", ApplicationLogType.Message, ApplicationLogAction.Info, $"Entity: AppFile, ID: {req.IdAppFile}, Path: {appFile.Path}");
 
-            var appStoredFile = new AppStoredFile
-            {
-                AppFileId = req.IdAppFile,
-                Versioned = false,
-                Status = (int)AppStoredFileStatusTypes.Processing,
-                StatusMessage = "Processing"
-            };
-            var appStoredFileAddResult = _appStoredFileRepository.AddAsync(appStoredFile).Result;
+            // Verificar se já está na fila de processamento
+            var alreadyInQueue = _applicationContext.AppFileProcessingQueue.Contains(e => e.AppFileId == req.IdAppFile);
             
-            if (appStoredFileAddResult is null)
+            if (alreadyInQueue)
             {
-                response.Errors.Add(new ErrorMessage("Failed to create stored file record. Database operation was unsuccessful."));
-
-                await _applicationLogService.AddLogAsync(traceId, "Failed to create stored file record", ApplicationLogType.Message, ApplicationLogAction.Error, $"Entity: AppFile, ID: {req.IdAppFile}, Path: {appFile.Path}");
-               
+                await _applicationLogService.AddLogAsync(traceId, "File already in processing queue", ApplicationLogType.Message, ApplicationLogAction.Info, $"Entity: AppFile, ID: {req.IdAppFile}");
                 return response;
             }
 
-            await _applicationLogService.AddLogAsync(traceId, "AppStoredFile created successfully", ApplicationLogType.Message, ApplicationLogAction.Success, $"Entity: AppStoredFile, ID: {appStoredFileAddResult.Id}, AppFileId: {req.IdAppFile}, Path: {appFile.Path}, Status: Processing");
-
-            this.SetAppFileStatus(req.IdAppFile, AppFileStatusTypes.Pending);
+            // Atualizar status do AppFile para Processing
+            appFile.Update(status: (int)AppFileStatusTypes.Processing, statusMessage: AppFileStatusTypes.Processing.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Processing).ToString());
+            _appFileRepository.Update(appFile);
 
             var clientDriver = _webSocketWorker.GetDriveClient(appFile.UserId);
 
             if (clientDriver is not null)
             {
                 var headers = new Dictionary<string, string>();
-
                 headers.Add("X-Trace-Application-Id", traceId.ToString());
 
                 _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
@@ -399,7 +345,6 @@ namespace Application.Services.AppFileService
                     Event = "SingleSync",
                     Body = new AppFileUpdateRequestMessage()
                     {
-                        AppStoredFileId = appStoredFileAddResult.Id,
                         AppFileId = appFile.Id,
                         Path = appFile.Path,
                     },
@@ -409,9 +354,7 @@ namespace Application.Services.AppFileService
             else
             {
                 response.Errors.Add(new ErrorMessage("Failed to request synchronization. The driver is not connected."));
-                
                 await _applicationLogService.AddLogAsync(traceId, "Sync request failed because driver is not connected", ApplicationLogType.Message, ApplicationLogAction.Error);
-
                 return response;
             }
 
@@ -435,18 +378,7 @@ namespace Application.Services.AppFileService
         {
             var traceId = await _applicationLogService.GetTraceId();
             var response = new DefaultResponse();
-            var appStoredFile = _appStoredFileRepository.Get().Include(e => e.AppFile).FirstOrDefault(e => e.Id == req.AppStoredFileId);
-
-            if (appStoredFile is null)
-            {
-                response.AddError(new ErrorMessage("Failed to perform single sync. The app stored file record was not found."));
-
-                await _applicationLogService.AddLogAsync(traceId, "Single sync failed because AppStoredFile was not found", ApplicationLogType.Message, ApplicationLogAction.Error);
-
-                return response;
-            }
-
-            var appFile = _appFileRepository.Get().FirstOrDefault(e => e.Id == appStoredFile.AppFileId);
+            var appFile = _appFileRepository.Get().FirstOrDefault(e => e.Id == req.AppFileId);
 
             if (appFile is null)
             {
@@ -467,83 +399,46 @@ namespace Application.Services.AppFileService
             {
                 response.AddError(new ErrorMessage("Failed to perform single sync. The uploaded file is empty."));
                 await _applicationLogService.AddLogAsync(traceId, "Single sync failed because uploaded file is empty", ApplicationLogType.Message, ApplicationLogAction.Error);
+                
                 return response;
             }
 
             await _applicationLogService.AddLogAsync(traceId, $"File received with {fileBytes.Length} bytes", ApplicationLogType.Message, ApplicationLogAction.Info);
 
-            var appStoredFileOld = _appStoredFileRepository.Get()
-                .Where(e => e.Status == (int)AppStoredFileStatusTypes.Complete && e.AppFileId == appFile.Id)
-                .Include(e => e.AppFile)
-                .OrderByDescending(e => e.CreateDate)
-                .FirstOrDefault();
-
-            var storedFile = new StoredFile()
+            var addedStoredFile = _storedFileRepository.AddAsync(new StoredFile()
             {
                 Bytes = fileBytes,
-                Name = appStoredFile.AppFile.Name,
+                Name = appFile.Name,
                 MimeType = "application/zip",
                 SizeInBytes = req.OriginalFileSize
-            };
-            var addedStoredFile = _storedFileRepository.AddAsync(storedFile).Result;
+            }).Result;
 
-            if (appStoredFile is null)
+            if (addedStoredFile is null)
             {
-                response.AddError(new ErrorMessage("Failed to perform single sync. The stored file record was not found."));
-
-                await _applicationLogService.AddLogAsync(traceId, "Single sync failed because AppStoredFile was not found", ApplicationLogType.Message, ApplicationLogAction.Error);
-
+                response.AddError(new ErrorMessage("Failed to save stored file. Database operation was unsuccessful."));
+                await _applicationLogService.AddLogAsync(traceId, "Single sync failed because StoredFile could not be saved", ApplicationLogType.Message, ApplicationLogAction.Error);
+                
                 return response;
             }
 
             await _applicationLogService.AddLogAsync(traceId, "Stream received from driver successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
 
-            appStoredFile.Update(storedFileId: addedStoredFile.Id, status: (int)AppStoredFileStatusTypes.Complete, statusMessage: "Complete");
-
-            var appStoredFileUpdatedResult = _appStoredFileRepository.Update(appStoredFile);
-
-            if (!appStoredFileUpdatedResult)
+            var appStoredFile = await _appStoredFileRepository.AddAsync(new AppStoredFile
             {
-                response.AddError(new ErrorMessage("Failed to update stored file record. Database operation was unsuccessful."));
-
+                AppFileId = appFile.Id,
+                StoredFileId = addedStoredFile.Id
+            });
+            
+            if (appStoredFile is null)
+            {
+                response.AddError(new ErrorMessage("Failed to create app stored file record. Database operation was unsuccessful."));
+                await _applicationLogService.AddLogAsync    (traceId, "Single sync failed because AppStoredFile could not be created", ApplicationLogType.Message, ApplicationLogAction.Error);
+                
                 return response;
             }
 
-            // Verificar status de todos os AppStoredFiles para atualizar AppFile
-            var allAppStoredFiles = _appStoredFileRepository.Get()
-                .Where(e => e.AppFileId == appFile.Id)
-                .ToList();
+            appFile.Update(status: (int)AppFileStatusTypes.Synced, statusMessage: AppFileStatusTypes.Synced.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Synced).ToString());
 
-            var hasProcessing = allAppStoredFiles.Any(e => 
-                e.Status == (int)AppStoredFileStatusTypes.Processing || 
-                e.Status == null);
-            var hasPathNotFounded = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.PathNotFounded);
-            var hasLockedFiles = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.LockedFiles);
-            var hasErrors = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.Error);
-            var allComplete = allAppStoredFiles.All(e => 
-                e.Status == (int)AppStoredFileStatusTypes.Complete);
-
-            if (hasProcessing)
-            {
-                // Ainda tem arquivos sendo processados
-                appFile.Update(status: (int)AppFileStatusTypes.Processing, statusMessage: AppFileStatusTypes.Processing.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Processing).ToString());
-            }
-            else if (allComplete)
-            {
-                // Todos processados com sucesso
-                appFile.Update(status: (int)AppFileStatusTypes.Synced, statusMessage: AppFileStatusTypes.Synced.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Synced).ToString());
-            }
-            else if (hasPathNotFounded)
-            {
-                // Tem arquivos com caminho não encontrado
-                appFile.Update(status: (int)AppFileStatusTypes.PathNotFounded, statusMessage: AppFileStatusTypes.PathNotFounded.GetDescription(), statusDetails: ((int)AppFileStatusTypes.PathNotFounded).ToString());
-            }
-            else if (hasErrors)
-            {
-                // Tem arquivos com erro genérico ou outros erros
-                appFile.Update(status: (int)AppFileStatusTypes.Unsynced, statusMessage: AppFileStatusTypes.Unsynced.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Unsynced).ToString());
-            }
-            
             var appFileUpdatedResult = _appFileRepository.Update(appFile);
 
             if (!appFileUpdatedResult)
@@ -553,48 +448,33 @@ namespace Application.Services.AppFileService
                 return response;
             }
 
-            if (appFile.VersionControl && appStoredFileOld is not null)
+            await _applicationLogService.AddLogAsync(traceId, $"AppFile status updated to Synced", ApplicationLogType.Message, ApplicationLogAction.Success);
+
+            var appStoredFileOld = _appStoredFileRepository.Get().Where(e => e.AppFileId == appFile.Id && e.Id != addedStoredFile.Id).OrderByDescending(e => e.CreateDate).FirstOrDefault();
+
+            if (appStoredFileOld is not null && !appFile.VersionControl)
             {
-                appStoredFileOld.Update(versioned: true);
+                var storedFileOld = _storedFileRepository.Get().FirstOrDefault(e=> e.Id == appStoredFileOld.StoredFileId);
 
-                var odlAppStoredFileUpdatedResult = _appStoredFileRepository.Update(appStoredFileOld);
-
-                if (!odlAppStoredFileUpdatedResult)
+                if (storedFileOld is not null)
                 {
-                    response.AddError(new ErrorMessage("Failed to update app stored file record. Database operation was unsuccessful."));
+                    storedFileOld.SoftDelete();
+
+                    if (!_storedFileRepository.Update(storedFileOld))
+                    {
+                        response.AddError(new ErrorMessage("Failed to soft delete old stored file record. Database operation was unsuccessful."));
+
+                        return response;
+                    }
+                }
+
+                appStoredFileOld.SoftDelete();    
+
+                if (!_appStoredFileRepository.Update(appStoredFileOld))
+                {
+                    response.AddError(new ErrorMessage("Failed to soft delete old app stored file record. Database operation was unsuccessful."));
 
                     return response;
-                }
-            }
-            else if(appStoredFileOld is not null)
-            {
-                // Verifica se o appStoredFileOld tem um StoredFile relacionado
-                var hasStoredFile = appStoredFileOld.StoredFileId.HasValue;
-                
-                if (hasStoredFile)
-                {
-                    // Soft delete - marca como deletado
-                    appStoredFileOld.IsDeleted = true;
-                    appStoredFileOld.DeletedAt = DateTime.Now;
-                    
-                    var odlAppStoredFileUpdatedResult = _appStoredFileRepository.Update(appStoredFileOld);
-
-                    if (!odlAppStoredFileUpdatedResult)
-                    {
-                        response.AddError(new ErrorMessage("Failed to soft delete old app stored file record. Database operation was unsuccessful."));
-                        return response;
-                    }
-                }
-                else
-                {
-                    // Hard delete - remove completamente
-                    var odlAppStoredFileUpdatedResult = _appStoredFileRepository.Remove(appStoredFileOld);
-
-                    if (!odlAppStoredFileUpdatedResult)
-                    {
-                        response.AddError(new ErrorMessage("Failed to remove app stored file record. Database operation was unsuccessful."));
-                        return response;
-                    }
                 }
             }
 
@@ -617,56 +497,48 @@ namespace Application.Services.AppFileService
         public async Task<DefaultResponse> DeleteFile(int id)
         {
             var traceId = await _applicationLogService.GetTraceId();
-            var appFile = _appFileRepository.Get()
-                .Include(e => e.User)
-                .FirstOrDefault(e => e.Id == id);
+            var appFile = _appFileRepository.Get().FirstOrDefault(e => e.Id == id);
+            var appStoredFiles = _appStoredFileRepository.Get().Where(e => e.AppFileId == id);
+            var appStoredFilesId = appStoredFiles.Select(e=>e.StoredFileId).ToList();
+            var storedFiles = _storedFileRepository.Get().Where(e => appStoredFilesId.Contains(e.Id));
             var response = new DefaultResponse(appFile is not null);
+
+            foreach (var item in storedFiles)
+            {
+                item.SoftDelete();
+                _storedFileRepository.Update(item);
+            }
+
+            foreach (var item in appStoredFiles)
+            {
+                item.SoftDelete();
+                _appStoredFileRepository.Update(item);
+            }
 
             if (!response.Success)
             {
                 response.AddError(new ErrorMessage($"Falha ao excluir o arquivo. O arquivo com o ID {id} não foi encontrado."));
+
                 await _applicationLogService.AddLogAsync(traceId, "File deletion failed because file was not found", ApplicationLogType.Message, ApplicationLogAction.Error);
+
                 return response;
             }
 
-            // Verifica se existem AppStoredFiles relacionados (incluindo os deletados)
-            var hasRelatedAppStoredFiles = _dbContext.AppStoredFile
-                .IgnoreQueryFilters()
-                .Any(e => e.AppFileId == id);
+            appFile.SoftDelete();
+                
+            var updateResult = _appFileRepository.Update(appFile);
+                
+            response.Success = updateResult;
 
-            if (hasRelatedAppStoredFiles)
+            if (!response.Success)
             {
-                // Soft delete - marca como deletado mas não remove do banco
-                appFile.IsDeleted = true;
-                appFile.DeletedAt = DateTime.Now;
-                var updateResult = _appFileRepository.Update(appFile);
-                response.Success = updateResult;
+                response.AddError(new ErrorMessage("Falha ao excluir o arquivo (soft delete). A operação no banco de dados não foi bem-sucedida."));
 
-                if (!response.Success)
-                {
-                    response.AddError(new ErrorMessage("Falha ao excluir o arquivo (soft delete). A operação no banco de dados não foi bem-sucedida."));
-                    await _applicationLogService.AddLogAsync(traceId, "File soft deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
-                }
-                else
-                {
-                    await _applicationLogService.AddLogAsync(traceId, "File soft deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
-                }
+                await _applicationLogService.AddLogAsync(traceId, "File soft deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
             }
             else
             {
-                // Hard delete - remove completamente do banco
-                var removeAppFileResult = _appFileRepository.Remove(appFile);
-                response.Success = removeAppFileResult;
-
-                if (!response.Success)
-                {
-                    response.AddError(new ErrorMessage("Falha ao excluir o arquivo. A operação no banco de dados não foi bem-sucedida."));
-                    await _applicationLogService.AddLogAsync(traceId, "File deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
-                }
-                else
-                {
-                    await _applicationLogService.AddLogAsync(traceId, "File deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
-                }
+                await _applicationLogService.AddLogAsync(traceId, "File soft deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
             }
 
             return response;
@@ -675,123 +547,52 @@ namespace Application.Services.AppFileService
         public async Task<DefaultResponse> DeleteStoredFile(int id)
         {
             var traceId = await _applicationLogService.GetTraceId();
-            var appStoredFile = _appStoredFileRepository.Get()
-                .Include(e => e.StoredFile)
-                .FirstOrDefault(e => e.Id == id);
+            var appStoredFile = _appStoredFileRepository.Get().FirstOrDefault(e => e.Id == id);
+            var storedFile = _storedFileRepository.Get().FirstOrDefault(e => e.Id == appStoredFile.StoredFileId);
             var response = new DefaultResponse(appStoredFile is not null);
 
             if (!response.Success)
             {
                 response.AddError(new ErrorMessage($"Failed to delete stored file. The record with ID {id} was not found."));
+
                 await _applicationLogService.AddLogAsync(traceId, "Stored file deletion failed because record was not found", ApplicationLogType.Message, ApplicationLogAction.Error);
+
                 return response;
             }
 
-            // Verifica se existe um StoredFile relacionado
-            if (appStoredFile.StoredFileId.HasValue && appStoredFile.StoredFile != null)
+            appStoredFile.SoftDelete();
+            
+            if (storedFile != null)
             {
-                // Soft delete - marca como deletado mas não remove do banco
-                appStoredFile.IsDeleted = true;
-                appStoredFile.DeletedAt = DateTime.Now;
-                
-                // Também marca o StoredFile como deletado
-                appStoredFile.StoredFile.IsDeleted = true;
-                appStoredFile.StoredFile.DeletedAt = DateTime.Now;
-                
-                var updateAppStoredFileResult = _appStoredFileRepository.Update(appStoredFile);
-                var updateStoredFileResult = _storedFileRepository.Update(appStoredFile.StoredFile);
-                
-                response.Success = updateAppStoredFileResult && updateStoredFileResult;
+                storedFile.SoftDelete();
 
-                if (!response.Success)
+                var updateStoredFileResult = _storedFileRepository.Update(storedFile);
+                
+                if (!updateStoredFileResult)
                 {
-                    response.AddError(new ErrorMessage("Failed to delete stored file (soft delete). The database operation was unsuccessful."));
-                    await _applicationLogService.AddLogAsync(traceId, "Stored file soft deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
-                }
-                else
-                {
-                    await _applicationLogService.AddLogAsync(traceId, "Stored file soft deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
+                    response.Success = false;
+
+                    response.AddError(new ErrorMessage("Failed to soft delete associated StoredFile. The database operation was unsuccessful."));
+                    
+                    await _applicationLogService.AddLogAsync(traceId, "StoredFile soft deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
+
+                    return response;
                 }
             }
-            else
-            {
-                // Hard delete - remove completamente do banco
-                var removeAppStoredFileResult = _appStoredFileRepository.Remove(appStoredFile);
-                response.Success = removeAppStoredFileResult;
+            
+            var updateAppStoredFileResult = _appStoredFileRepository.Update(appStoredFile);
 
-                if (!response.Success)
-                {
-                    response.AddError(new ErrorMessage("Failed to delete stored file. The database operation was unsuccessful."));
-                    await _applicationLogService.AddLogAsync(traceId, "Stored file deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
-                }
-                else
-                {
-                    await _applicationLogService.AddLogAsync(traceId, "Stored file deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
-                }
-            }
-
-            return response;
-        }
-
-        public async Task<DefaultResponse> ReprocessFile(int appStoredFileId)
-        {
-            var traceId = await _applicationLogService.GetTraceId();
-
-            var appStoredFile = _appStoredFileRepository.Get()
-                .Include(e => e.AppFile)
-                .FirstOrDefault(e => e.Id == appStoredFileId);
-
-            var response = new DefaultResponse(appStoredFile is not null);
+            response.Success = updateAppStoredFileResult;
 
             if (!response.Success)
             {
-                response.AddError(new ErrorMessage($"Failed to request reprocessing. The stored file with ID {appStoredFileId} was not found."));
-                await _applicationLogService.AddLogAsync(traceId, "Reprocess request failed because AppStoredFile was not found", ApplicationLogType.Message, ApplicationLogAction.Error);
-                return response;
-            }
+                response.AddError(new ErrorMessage("Failed to soft delete stored file. The database operation was unsuccessful."));
 
-            appStoredFile.Update(status: (int)AppStoredFileStatusTypes.Processing, statusMessage: AppStoredFileStatusTypes.Processing.GetDescription(), statusDetails: ((int)AppStoredFileStatusTypes.Processing).ToString());
-
-            var updateResult = _appStoredFileRepository.Update(appStoredFile);
-
-            if (!updateResult)
-            {
-                response.AddError(new ErrorMessage("Failed to update the file for reprocessing. The database operation was unsuccessful."));
-                await _applicationLogService.AddLogAsync(traceId, "Reprocess update failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
-                return response;
-            }
-
-            this.SetAppStoredFileStatus(appStoredFileId, AppStoredFileStatusTypes.Processing);
-
-            await _applicationLogService.AddLogAsync(traceId, "File marked for reprocessing", ApplicationLogType.Message, ApplicationLogAction.Info);
-
-            var clientDriver = _webSocketWorker.GetDriveClient(appStoredFile.AppFile.UserId);
-
-            if (clientDriver is not null)
-            {
-                var headers = new Dictionary<string, string>();
-
-                headers.Add("X-Trace-Application-Id", traceId.ToString());
-
-                _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
-                {
-                    Event = "SingleSync",
-                    Body = new AppFileUpdateRequestMessage()
-                    {
-                        AppStoredFileId = appStoredFileId,
-                        AppFileId = appStoredFile.AppFileId,
-                        Path = appStoredFile.AppFile.Path,
-                    },
-                    Headers  = headers
-                });
-
-                await _applicationLogService.AddLogAsync(traceId, "Reprocess request sent to driver successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
+                await _applicationLogService.AddLogAsync(traceId, "Stored file soft deletion failed because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
             }
             else
             {
-                response.Errors.Add(new ErrorMessage("Failed to request synchronization. The driver is not connected."));
-
-                await _applicationLogService.AddLogAsync(traceId, "Reprocess request failed because driver is not connected", ApplicationLogType.Message, ApplicationLogAction.Error);
+                await _applicationLogService.AddLogAsync(traceId, "Stored file soft deleted successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
             }
 
             return response;
@@ -826,8 +627,6 @@ namespace Application.Services.AppFileService
             if (updateResult)
             {
                 await _applicationLogService.AddLogAsync(traceId, $"AppFile status updated to {status} successfully", ApplicationLogType.Message, ApplicationLogAction.Success, $"Entity: AppFile, ID: {appFileId}, Path: {appFile.Path}, Status: {status}");
-
-                response.Errors.Add(new ErrorMessage("Failed to request synchronization. The update is failed."));
             }
             else
             {
@@ -850,163 +649,6 @@ namespace Application.Services.AppFileService
             return response;
         }
 
-        public async Task<DefaultResponse> SetAppStoredFileStatus(int appStoredFileId, AppStoredFileStatusTypes status)
-        {
-            var traceId = await _applicationLogService.GetTraceId();
-            
-            await _applicationLogService.AddLogAsync(traceId, $"Watcher event received for AppStoredFile status update to {status}", ApplicationLogType.Message, ApplicationLogAction.Info, $"Entity: AppStoredFile, ID: {appStoredFileId}, Target Status: {status}");
-            
-            var appStoredFile = _appStoredFileRepository.Get().FirstOrDefault(e => e.Id == appStoredFileId);
-            var response = new DefaultResponse(appStoredFile != null);
-
-            if (!response.Success)
-            {
-                response.Errors.Add(new ErrorMessage("Failed to request synchronization. The file with the specified ID was not found."));
-
-                await _applicationLogService.AddLogAsync(traceId, "Sync request failed because app file was not found", ApplicationLogType.Message, ApplicationLogAction.Error, $"Entity: AppStoredFile, ID: {appStoredFileId}");
-
-                return response;
-            }
-
-            if (appStoredFile.StoredFileId == null && AppStoredFileStatusTypes.Complete == status)
-            {
-                appStoredFile.Update(
-                    status: (int)AppStoredFileStatusTypes.Error,
-                    statusMessage: "Error",
-                    statusDetails: "The queue not contains file to be proccessed and the file is not saved in system."
-                );
-            }
-            else
-            {
-                appStoredFile.Update(
-                    status: (int)status,
-                    statusMessage: status.GetDescription(),
-                    statusDetails: ((int)status).ToString()
-                );
-            }
-
-            var updateResult = _appStoredFileRepository.Update(appStoredFile);
-
-
-            if (updateResult)
-            {
-                await _applicationLogService.AddLogAsync(traceId, $"AppStoredFile status updated to {status} successfully", ApplicationLogType.Message, ApplicationLogAction.Success, $"Entity: AppStoredFile, ID: {appStoredFileId}, AppFileId: {appStoredFile.AppFileId}, Status: {status}");
-            }
-            else
-            {
-                await _applicationLogService.AddLogAsync(traceId, $"Failed to update AppStoredFile status to {status} because database operation was unsuccessful", ApplicationLogType.Message, ApplicationLogAction.Error);
-
-                response.Errors.Add(new ErrorMessage("Failed to request synchronization. The update is failed."));
-
-                return response;
-            }
-
-            var allAppStoredFiles = _appStoredFileRepository.Get().Where(e => e.AppFileId == appStoredFile.AppFileId).ToList();
-            var hasProcessing = allAppStoredFiles.Any(e => 
-                e.Status == (int)AppStoredFileStatusTypes.Processing || 
-                e.Status == null
-            );
-            var hasPathNotFounded = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.PathNotFounded);
-            var hasLockedFiles = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.LockedFiles);
-            var hasErrors = allAppStoredFiles.Any(e => e.Status == (int)AppStoredFileStatusTypes.Error);
-            var allComplete = allAppStoredFiles.All(e => 
-                e.Status == (int)AppStoredFileStatusTypes.Complete
-            );
-            var appFile = _appFileRepository.Get().FirstOrDefault(e => e.Id == appStoredFile.AppFileId);
-            
-            if (appFile != null)
-            {
-                if (hasProcessing)
-                {
-                    appFile.Update(status: (int)AppFileStatusTypes.Processing, statusMessage: AppFileStatusTypes.Processing.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Processing).ToString());
-                }
-                else if (allComplete)
-                {
-                    appFile.Update(status: (int)AppFileStatusTypes.Synced, statusMessage: AppFileStatusTypes.Synced.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Synced).ToString());
-                }
-                else if (hasPathNotFounded)
-                {
-                    appFile.Update(status: (int)AppFileStatusTypes.PathNotFounded, statusMessage: AppFileStatusTypes.PathNotFounded.GetDescription(), statusDetails: ((int)AppFileStatusTypes.PathNotFounded).ToString());
-                }
-                else if (hasErrors)
-                {
-                    appFile.Update(status: (int)AppFileStatusTypes.Unsynced, statusMessage: AppFileStatusTypes.Unsynced.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Unsynced).ToString());
-                }
-                else if (hasLockedFiles)
-                {
-                    appFile.Update(status: (int)AppFileStatusTypes.LockedFiles, statusMessage: AppFileStatusTypes.LockedFiles.GetDescription(), statusDetails: ((int)AppFileStatusTypes.Unsynced).ToString());
-                }
-
-                var appFileUpdateResult = _appFileRepository.Update(appFile);
-
-                if (appFileUpdateResult)
-                {
-                    await _applicationLogService.AddLogAsync(traceId, $"AppFile status automatically updated based on AppStoredFiles", ApplicationLogType.Message, ApplicationLogAction.Success);
-                }
-            }
-
-            var client = _webSocketWorker.GetWebClient(appStoredFile.UserId);
-
-            if (client is not null)
-            {
-                _webSocketWorker.SendAsync(client.Id, new WebSocketRequest()
-                {
-                    Body = null,
-                    Event = "AppFileStatusUpdatePing"
-                });
-            }
-
-            return response;
-        }
-
-        public async Task<DefaultResponse> CheckAppStoredFileStatus(CheckAppStoredFileStatusRequestDto request)
-        {
-            var traceId = await _applicationLogService.GetTraceId();
-            var response = new DefaultResponse(true);
-            var appStoredFile = _appStoredFileRepository.Get().Include(e => e.AppFile).FirstOrDefault(e => e.Id == request.AppStoredFileId);
-
-            if (appStoredFile == null)
-            {
-                response.AddError(new ErrorMessage("AppStoredFile not found."));
-
-                await _applicationLogService.AddLogAsync(traceId, "Status check failed because AppStoredFile was not found", ApplicationLogType.Message, ApplicationLogAction.Error);
-
-                return response;
-            }
-
-            await _applicationLogService.AddLogAsync(traceId, "Status check initiated", ApplicationLogType.Message, ApplicationLogAction.Info);
-
-            var clientDriver = _webSocketWorker.GetDriveClient(appStoredFile.UserId);
-
-            if (clientDriver is not null)
-            {
-                var headers = new Dictionary<string, string>();
-
-                headers.Add("X-Trace-Application-Id", traceId.ToString());
-
-                _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
-                {
-                    Event = "CheckStatus",
-                    Headers = headers,
-                    Body = new AppFileStatusCheckRequestMessage()
-                    {
-                        AppStoredFileId = request.AppStoredFileId,
-                        Path = appStoredFile.AppFile.Path
-                    }
-                });
-
-                await _applicationLogService.AddLogAsync(traceId, "Status check request sent to driver successfully", ApplicationLogType.Message, ApplicationLogAction.Success);
-            }
-            else
-            {
-                response.AddError(new ErrorMessage("Driver is not connected."));
-
-                await _applicationLogService.AddLogAsync(traceId, "Status check failed because driver is not connected", ApplicationLogType.Message, ApplicationLogAction.Error);
-            }
-
-            return response;
-        }
-
         public async Task<DefaultResponse> CheckAppFileStatus(CheckAppFileStatusRequestDto request)
         {
             var traceId = await _applicationLogService.GetTraceId();
@@ -1016,9 +658,7 @@ namespace Application.Services.AppFileService
             if (appFile == null)
             {
                 response.AddError(new ErrorMessage("AppFile not found."));
-
                 await _applicationLogService.AddLogAsync(traceId, "Status check failed because AppFile was not found", ApplicationLogType.Message, ApplicationLogAction.Error, $"Entity: AppFile, ID: {request.AppFileId}");
-                
                 return response;
             }
 
@@ -1027,7 +667,7 @@ namespace Application.Services.AppFileService
             // Buscar o último arquivo sincronizado
             var lastSyncedFile = _appStoredFileRepository.Get()
                 .Include(e => e.StoredFile)
-                .Where(e => e.AppFileId == request.AppFileId && e.Status == (int)AppStoredFileStatusTypes.Complete)
+                .Where(e => e.AppFileId == request.AppFileId && e.StoredFileId != null)
                 .OrderByDescending(e => e.CreateDate)
                 .FirstOrDefault();
 
@@ -1036,7 +676,6 @@ namespace Application.Services.AppFileService
             if (clientDriver is not null)
             {
                 var headers = new Dictionary<string, string>();
-
                 headers.Add("X-Trace-Application-Id", traceId.ToString());
 
                 _webSocketWorker.SendAsync(clientDriver.Id, new WebSocketRequest()
@@ -1085,29 +724,30 @@ namespace Application.Services.AppFileService
 
             try
             {
-                // Busca todos os itens marcados como deletados (ignora o filtro global)
-                var deletedAppFiles = _dbContext.AppFile
-                    .IgnoreQueryFilters()
-                    .Where(e => e.IsDeleted)
+                var deletedAppFiles = _appFileRepository.IgnoreMediator(typeof(SoftDeleteMediator<>)).Get()
                     .ToList();
 
-                var deletedAppStoredFiles = _dbContext.AppStoredFile
-                    .IgnoreQueryFilters()
-                    .Where(e => e.IsDeleted)
+                var deletedAppStoredFiles = _appStoredFileRepository.IgnoreMediator(typeof(SoftDeleteMediator<>)).Get()
                     .Include(e => e.StoredFile)
                     .ToList();
 
-                var deletedStoredFiles = _dbContext.StoredFile
-                    .IgnoreQueryFilters()
-                    .Where(e => e.IsDeleted)
+                var deletedStoredFiles = _storedFileRepository.IgnoreMediator(typeof(SoftDeleteMediator<>)).Get()
                     .ToList();
 
-                // Remove permanentemente todos os itens
-                _dbContext.AppFile.RemoveRange(deletedAppFiles);
-                _dbContext.AppStoredFile.RemoveRange(deletedAppStoredFiles);
-                _dbContext.StoredFile.RemoveRange(deletedStoredFiles);
-
-                await _dbContext.SaveChangesAsync();
+                foreach (var item in deletedAppFiles)
+                {
+                    _appFileRepository.Remove(item);
+                }
+                
+                foreach (var item in deletedAppStoredFiles)
+                {
+                    _appStoredFileRepository.Remove(item);
+                }
+                
+                foreach (var item in deletedStoredFiles)
+                {
+                    _storedFileRepository.Remove(item);
+                }
 
                 var totalDeleted = deletedAppFiles.Count + deletedAppStoredFiles.Count + deletedStoredFiles.Count;
 

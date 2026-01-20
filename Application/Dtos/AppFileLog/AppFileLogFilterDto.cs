@@ -7,7 +7,6 @@ namespace Application.Dtos.AppFileLog
         public int? AppFileId { get; set; }
         public int? AppStoredFileId { get; set; }
         public int? StoredFileId { get; set; }
-        public LogStatusTypes? ActionType { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? UserId { get; set; }

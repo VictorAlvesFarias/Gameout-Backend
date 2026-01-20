@@ -45,15 +45,9 @@ namespace Infrastructure.Context
                       .HasMaxLength(256)
                       .IsRequired(false);
 
-                entity.Property(x => x.IsDeleted)
+                entity.Property(x => x.Deleted)
                       .IsRequired()
                       .HasDefaultValue(false);
-
-                entity.Property(x => x.DeletedAt)
-                      .IsRequired(false);
-
-                // Filtro global para excluir registros deletados
-                entity.HasQueryFilter(x => !x.IsDeleted);
             });
 
             modelBuilder.Entity<AppStoredFile>(entity =>
@@ -68,30 +62,8 @@ namespace Infrastructure.Context
                 entity.Property(x => x.StoredFileId)
                       .IsRequired(false);
 
-                entity.Property(x => x.Versioned)
-                      .IsRequired();
-
-                entity.Property(x => x.Status)
-                      .IsRequired()
-                      .HasDefaultValue(0);
-
-                entity.Property(x => x.StatusDetails)
-                      .HasMaxLength(2048)
-                      .IsRequired(false);
-
-                entity.Property(x => x.StatusMessage)
-                      .HasMaxLength(256)
-                      .IsRequired(false);
-
                 entity.Property(x => x.UpdateDate)
                       .IsRequired();
-
-                entity.Property(x => x.IsDeleted)
-                      .IsRequired()
-                      .HasDefaultValue(false);
-
-                entity.Property(x => x.DeletedAt)
-                      .IsRequired(false);
 
                 entity.HasOne(x => x.AppFile)
                       .WithMany()
@@ -104,9 +76,6 @@ namespace Infrastructure.Context
                       .HasForeignKey(x => x.StoredFileId)
                       .OnDelete(DeleteBehavior.SetNull)
                       .IsRequired(false);
-
-                // Filtro global para excluir registros deletados
-                entity.HasQueryFilter(x => !x.IsDeleted);
             });
 
             modelBuilder.Entity<UserApiKey>(entity =>
@@ -243,15 +212,10 @@ namespace Infrastructure.Context
 
                 entity.HasKey(x => x.Id);
 
-                entity.Property(x => x.IsDeleted)
+                entity.Property(x => x.Deleted)
                       .IsRequired()
                       .HasDefaultValue(false);
 
-                entity.Property(x => x.DeletedAt)
-                      .IsRequired(false);
-
-                // Filtro global para excluir registros deletados
-                entity.HasQueryFilter(x => !x.IsDeleted);
             });
         }
     }

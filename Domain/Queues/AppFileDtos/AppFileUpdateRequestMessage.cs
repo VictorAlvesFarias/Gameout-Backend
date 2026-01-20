@@ -2,7 +2,6 @@
 {
     public class AppFileUpdateRequestMessage
     {
-        public int AppStoredFileId { get; set; }
         public int AppFileId { get; set; }
         public string Path { get; set; }
     }

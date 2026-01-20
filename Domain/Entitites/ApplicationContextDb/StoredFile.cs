@@ -8,8 +8,6 @@ namespace Domain.Entitites.ApplicationContextDb
         public string MimeType { get; set; }
         public byte[] Bytes { get; set; }
         public double SizeInBytes { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedAt { get; set; }
 
         public void Update(string _name, string _mimeType, byte[] _base64, double _sizeInBytes)
         {

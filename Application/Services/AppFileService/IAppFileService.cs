@@ -11,18 +11,16 @@ namespace Application.Services.AppFileService
         Task<BaseResponse<int>> CreateTraceId();
         Task<BaseResponse<bool>> DriverIsConnected();
         BaseResponse<List<AppFileResponseDto>> GetFiles();
-        BaseResponse<List<AppStoredFileResponseDto>> GetAppStoredFiles(int? idAppFile = null, bool? processing = false);
+        BaseResponse<AppFileResponseDto> GetFileById(int id);
+        BaseResponse<List<AppStoredFileResponseDto>> GetAppStoredFiles(int idAppFile);
         Task<BaseResponse<AppFileResponseDto>> InsertFile(AppFileRequestDto req);
         Task<BaseResponse<AppFileResponseDto>> UpdateFile(AppFileRequestDto req, int id);
         Task<BaseResponse<StoredFile>> DownloadFileWithToken(string token);
         Task<DefaultResponse> RequestSync(AppFileSyncRequestDto req);
-        Task<DefaultResponse> ReprocessFile(int appStoredFileId);
         Task<DefaultResponse> DeleteFile(int id);
         Task<DefaultResponse> DeleteStoredFile(int id);
         Task<DefaultResponse> SingleSync(AppFileStreamFileRequestDto req);
         Task<DefaultResponse> SetAppFileStatus(int appFileId, AppFileStatusTypes status);
-        Task<DefaultResponse> SetAppStoredFileStatus(int appStoredFileId, AppStoredFileStatusTypes status);
-        Task<DefaultResponse> CheckAppStoredFileStatus(CheckAppStoredFileStatusRequestDto request);
         Task<DefaultResponse> CheckAppFileStatus(CheckAppFileStatusRequestDto request);
         Task<DefaultResponse> DeleteSoftDeletedItems();
     }

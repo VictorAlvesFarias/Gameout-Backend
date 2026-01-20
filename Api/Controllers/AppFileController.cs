@@ -70,10 +70,18 @@ namespace ASP.NET_Core_Template.Controllers
         }
 
         [Authorize]
-        [HttpGet("get-stored-files")]
-        public ActionResult<BaseResponse<List<AppStoredFileResponseDto>>> GetStoredFiles(int? idAppFile = null, bool? processing = false)
+        [HttpGet("get-file-by-id")]
+        public ActionResult<BaseResponse<AppFileResponseDto>> GetFileById(int id)
         {
-            var result = _appFileService.GetAppStoredFiles(idAppFile:idAppFile, processing:processing);
+            var result = _appFileService.GetFileById(id);
+            return this.Result(result);
+        }
+
+        [Authorize]
+        [HttpGet("get-stored-files")]
+        public ActionResult<BaseResponse<List<AppStoredFileResponseDto>>> GetStoredFiles(int idAppFile)
+        {
+            var result = _appFileService.GetAppStoredFiles(idAppFile);
             return this.Result(result);
         }
 
@@ -82,14 +90,6 @@ namespace ASP.NET_Core_Template.Controllers
         public async Task<ActionResult<DefaultResponse>> SingleSync([FromBody] AppFileSyncRequestDto req)
         {
             var result = await _appFileService.RequestSync(req);
-            return this.DefaultResult(result);
-        }
-
-        [Authorize]
-        [HttpPost("reprocess-file")]
-        public async Task<ActionResult<DefaultResponse>> ReprocessFile(int appStoredFileId)
-        {
-            var result = await _appFileService.ReprocessFile(appStoredFileId);
             return this.DefaultResult(result);
         }
 
@@ -107,14 +107,6 @@ namespace ASP.NET_Core_Template.Controllers
         {
             var result = await _appFileService.DownloadFileWithToken(token);
             return this.FileResult(result, true);
-        }
-
-        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
-        [HttpPost("check-stored-file-status")]
-        public async Task<ActionResult<DefaultResponse>> CheckAppStoredFileStatus([FromBody] CheckAppStoredFileStatusRequestDto request)
-        {
-            var result = await _appFileService.CheckAppStoredFileStatus(request);
-            return this.DefaultResult(result);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]

@@ -24,7 +24,6 @@ namespace ASP.NET_Core_Template.Controllers
             _appFileService = appFileService;
         }
 
-        [Traced]
         [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
         [HttpGet("get-trace-id")]
         public async Task<ActionResult<BaseResponse<int>>> GetTraceId()
@@ -57,15 +56,6 @@ namespace ASP.NET_Core_Template.Controllers
         public async Task<ActionResult<DefaultResponse>> UpdateAppFileStatus([FromBody] UpdateAppFileStatusRequestDto request)
         {
             var result = await _appFileService.SetAppFileStatus(request.AppFileId, request.Status);
-            return this.DefaultResult(result);
-        }
-
-        [Traced(OnCreate = true)]
-        [Authorize(AuthenticationSchemes = "Bearer,ApiKey")]
-        [HttpPut("update-appstoredfile-status")]
-        public async Task<ActionResult<DefaultResponse>> UpdateAppStoredFileStatus([FromBody] UpdateAppStoredFileStatusRequestDto request)
-        {
-            var result = await _appFileService.SetAppStoredFileStatus(request.AppStoredFileId, request.Status);
             return this.DefaultResult(result);
         }
     }

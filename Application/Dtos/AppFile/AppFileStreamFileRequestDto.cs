@@ -9,7 +9,7 @@ namespace Domain.Queues.AppFileDtos
 {
     public class AppFileStreamFileRequestDto
     {
-        public int AppStoredFileId { get; set; }
+        public int AppFileId { get; set; }
         public int OriginalFileSize { get; set; }
         public IFormFile File { get; set; }
     }

@@ -8,6 +8,7 @@ using Application.Services.IdentityService;
 using Application.Services.WebSocketService;
 using Application.Workers;
 using Domain.Entitites.ApplicationContextDb;
+using Domain.Queues.AppFileDtos;
 using Infrastructure.Context;
 using Infrastructure.Factories;
 using Infrastructure.Mediators;
@@ -16,6 +17,7 @@ using Web.Api.Toolkit.Entity.Infraestructure.Factories;
 using Web.Api.Toolkit.Entity.Infraestructure.Mediators;
 using Web.Api.Toolkit.Entity.Infraestructure.Repositories;
 using Web.Api.Toolkit.Identity.Application.Extensions;
+using Web.Api.Toolkit.Queues.Application.Services;
 
 namespace ASP.NET_Core_Template.Ioc
 {
@@ -23,6 +25,9 @@ namespace ASP.NET_Core_Template.Ioc
     {
         public static void RegisterServices(this IServiceCollection services, IConfiguration configuration)
         {
+            // Registrar fila de processamento
+            services.AddSingleton(typeof(IQueueService<>), typeof(QueueService<>));
+            
             services.AddSingleton<ApplicationContext>();
             services.AddSingleton<AppFileWorker>();
 
@@ -32,7 +37,8 @@ namespace ASP.NET_Core_Template.Ioc
 
             services.AddScoped<IDatabaseContextFactory, DbContextFactory>();
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-            services.AddScoped(typeof(IDatabaseContextMediator<>), typeof(DatabaseContextMediator<>));
+            services.AddScoped(typeof(IDatabaseContextMediator<>), typeof(UserOwnedDatabaseMediator<>));
+            services.AddScoped(typeof(IDatabaseContextMediator<>), typeof(SoftDeleteMediator<>));
             services.AddScoped<IAppFileService, AppFileService>();
             services.AddScoped<IApplicationLogService, ApplicationLogService>();
             services.AddScoped<IIdentityService, IdentityService>();

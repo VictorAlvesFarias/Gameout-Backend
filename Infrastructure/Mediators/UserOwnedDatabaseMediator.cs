@@ -7,18 +7,18 @@ using Web.Api.Toolkit.Entity.Infraestructure.Mediators;
 
 namespace Infrastructure.Mediators
 {
-    public class DatabaseContextMediator<T> : IDatabaseContextMediator<T> where T : class
+    public class UserOwnedDatabaseMediator<T> : IDatabaseContextMediator<T> where T : class
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
      
-        public DatabaseContextMediator(IHttpContextAccessor httpContextAccessor)
+        public UserOwnedDatabaseMediator(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         } 
 
-        public IQueryable<T> Handle(IQueryable<T> query, DbContext context, bool ignoreUserId)
+        public IQueryable<T> Handle(IQueryable<T> query, DbContext context)
         {
-            if (typeof(BaseUserOwnedEntity).IsAssignableFrom(typeof(T)) && context is ApplicationDbContext appContext && ignoreUserId == false)
+            if (typeof(BaseUserOwnedEntity).IsAssignableFrom(typeof(T)) && context is ApplicationDbContext appContext)
             {
                 var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var filtered = query.OfType<BaseUserOwnedEntity>().Where(x => x.UserId == userId).Cast<T>();
