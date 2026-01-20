@@ -450,7 +450,7 @@ namespace Application.Services.AppFileService
 
             await _applicationLogService.AddLogAsync(traceId, $"AppFile status updated to Synced", ApplicationLogType.Message, ApplicationLogAction.Success);
 
-            var appStoredFileOld = _appStoredFileRepository.Get().Where(e => e.AppFileId == appFile.Id && e.Id != addedStoredFile.Id).OrderByDescending(e => e.CreateDate).FirstOrDefault();
+            var appStoredFileOld = _appStoredFileRepository.Get().Where(e => e.AppFileId == appFile.Id && e.Id != appStoredFile.Id).OrderByDescending(e => e.CreateDate).FirstOrDefault();
 
             if (appStoredFileOld is not null && !appFile.VersionControl)
             {
